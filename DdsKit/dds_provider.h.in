@@ -1,0 +1,15 @@
+/**
+ * Automatically generated header that expands to contain the appropriate
+ * includes for the selected DDS provider.
+ */
+
+#ifndef _DDSKIT_DDS_PROVIDER_H_
+#define _DDSKIT_DDS_PROVIDER_H_
+
+#include <DdsKit/dds_provider_ids.h>
+
+#cmakedefine DDS_PROVIDER @DDS_PROVIDER@
+
+@dds_provider_includes@
+
+#endif /* !_DDSKIT_DDS_PROVIDER_H_ */

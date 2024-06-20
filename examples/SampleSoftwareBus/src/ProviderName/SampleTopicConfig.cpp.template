@@ -1,0 +1,12 @@
+#include <limits>
+
+#include "SampleTopicConfig.h"
+
+
+const char *SampleTopicConfig::TopicName = "<name given to topic>";
+const bool SampleTopicConfig::NormallyReliable = <true for RELIABLE QoS; false otherwise>;
+const unsigned SampleTopicConfig::DefaultHistoryDepth = <history depth in sample count>;
+const char *SampleTopicConfig::TypeNameAlias = "<name given to sample data type>";
+const unsigned SampleTopicConfig::MaxSamplesPerSecond = std::numeric_limits< unsigned >::max();
+
+// vim: set ts=4 sw=4 expandtab:

@@ -1,0 +1,24 @@
+#ifndef _SAMPLE_SOFTWARE_BUS_SRC_PROVIDER_NAME_TOPIC_CONFIG_SKELETON_H_
+#define _SAMPLE_SOFTWARE_BUS_SRC_PROVIDER_NAME_TOPIC_CONFIG_SKELETON_H_
+
+<add provider-generated headers>
+
+struct SampleTopicConfig
+{
+    using SampleType = <C++ type of the sample struct>;
+    using SampleSeqType = <C++ type of sample struct sequence>;
+    using TypeSupportType = <C++ type of sample struct type support>;
+    using ReaderPtrType = <C++ pointer type to topic data reader>;
+    using ReaderType = <C++ type of topic data reader>;
+    using WriterPtrType = <C++ pointer type to topic data writer>;
+    using WriterType = <C++ type of topic data writer>;
+    static const char *TopicName;
+    static const bool NormallyReliable;
+    static const unsigned DefaultHistoryDepth;
+    static const char *TypeNameAlias;
+    static const unsigned MaxSamplesPerSecond;
+};
+
+#endif /* !_SAMPLE_SOFTWARE_BUS_SRC_PROVIDER_NAME_TOPIC_CONFIG_SKELETON_H_ */
+
+// vim: set ts=4 sw=4 expandtab:
