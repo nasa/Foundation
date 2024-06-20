@@ -3,6 +3,11 @@
 A tutorial on how to use the Foundation SDK is
 [available here](./docs/tutorial.md).
 
+# Building
+
+Instructions on how to build the Foundation SDK are
+[available here](./docs/building.md).
+
 # Introduction and a Quick Tour
 
 The Foundation library contains a class library that system software developers
