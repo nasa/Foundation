@@ -40,7 +40,12 @@ target_include_directories(
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/${WITH_DDS}>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
         $<INSTALL_INTERFACE:include>
-        ${OpenSplice_INCLUDE_DIRS}
+)
+
+target_link_libraries(
+    ${PROJECT_NAME}
+    PUBLIC
+        ${DDS_PROVIDER_LIB}
 )
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY VERSION ${PROJECT_VERSION})

@@ -2,9 +2,9 @@
 # Build Configuration for the Foundation SDK
 # ============================================================================
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 project(Foundation
-    VERSION 1.0.0
+    VERSION 1.1.0
     DESCRIPTION "Event driven framework for Linux-based applications."
     LANGUAGES CXX
 )
@@ -20,6 +20,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     list (APPEND PUBLIC_DEFINES "_GNU_SOURCE")
 endif ()
 
+set(WITH_DDS "OpenSplice" CACHE STRING "DDS provider to use")
+set(WITH_DDSKIT "Classic" CACHE STRING "DdsKit flavor to build (\"Classic\" or \"ISO\")")
+
 # =============================================================================
 # Common OS SDK configuration
 # =============================================================================
@@ -30,6 +33,9 @@ check_symbol_exists(EFD_NONBLOCK sys/eventfd.h EFD_NONBLOCK_FOUND)
 check_symbol_exists(timerfd_create sys/timerfd.h TIMERFD_CREATE_FOUND)
 check_symbol_exists(eventfd sys/eventfd.h EVENTFD_FOUND)
 check_symbol_exists(signalfd sys/signalfd.h SIGNALFD_FOUND)
+check_symbol_exists (pipe2 unistd.h PIPE2_FOUND)
+check_symbol_exists(PF_CAN sys/socket.h PF_CAN_FOUND)
+check_symbol_exists(SOCK_NONBLOCK sys/socket.h SOCK_NONBLOCK_FOUND)
 
 if (NOT TIMERFD_CREATE_FOUND)
     message (FATAL_ERROR "timerfd_create() function required.")
@@ -149,7 +155,7 @@ target_link_libraries(
 target_compile_features(
     CoreKit
     PUBLIC
-        cxx_std_11
+        cxx_std_17
 )
 
 set_target_properties(
@@ -162,9 +168,6 @@ set_target_properties(
 # =============================================================================
 # CanBusKit build plan
 # =============================================================================
-
-check_symbol_exists(PF_CAN sys/socket.h PF_CAN_FOUND)
-check_symbol_exists(SOCK_NONBLOCK sys/socket.h SOCK_NONBLOCK_FOUND)
 
 add_library(
     CanBusKit
@@ -208,7 +211,7 @@ target_link_libraries(
 target_compile_features(
     CanBusKit
     PUBLIC
-        cxx_std_11
+        cxx_std_17
 )
 
 set_target_properties(
@@ -219,92 +222,169 @@ set_target_properties(
 )
 
 # =============================================================================
-# DdsKit build plan
+# Classic C++ DdsKit build plan
 # =============================================================================
 
-check_symbol_exists (pipe2 unistd.h PIPE2_FOUND)
+if (WITH_DDSKIT STREQUAL "Classic")
+    if (WITH_DDS STREQUAL "CoreDX")
+        set (DDS_PROVIDER_COMP "Cxxcf")
+        set (DDS_PROVIDER_LIB "CoreDX::Cxxcf")
+        set (DDS_PROVIDER "DDS_PROVIDER_COREDX")
+        set (dds_frag_file_name "DdsKit/coredx_includes.h.frag")
+    elseif (WITH_DDS STREQUAL "OpenSplice")
+        set (DDS_PROVIDER_COMP "Sacpp")
+        set (DDS_PROVIDER_LIB "OpenSplice::Sacpp")
+        set (DDS_PROVIDER "DDS_PROVIDER_OSPL")
+        set (dds_frag_file_name "DdsKit/opensplice_includes.h.frag")
+    else ()
+        message (FATAL_ERROR "Missing or unknown DDS provider '${WITH_DDS}'.")
+    endif ()
+    find_package(${WITH_DDS} REQUIRED COMPONENTS ${DDS_PROVIDER_COMP})
 
-if (WITH_DDS STREQUAL "CoreDX")
-    set (DDS_PROVIDER_COMP "Cxxcf")
-    set (DDS_PROVIDER_LIB "CoreDX::Cxxcf")
-    set (DDS_PROVIDER "DDS_PROVIDER_COREDX")
-    set (dds_frag_file_name "DdsKit/coredx_includes.h.frag")
-elseif (WITH_DDS STREQUAL "OpenSplice")
-    set (DDS_PROVIDER_COMP "Sacpp")
-    set (DDS_PROVIDER_LIB "OpenSplice::Sacpp")
-    set (DDS_PROVIDER "DDS_PROVIDER_OSPL")
-    set (dds_frag_file_name "DdsKit/opensplice_includes.h.frag")
-else ()
-    message (FATAL_ERROR "Missing or unknown DDS provider '${WITH_DDS}'.")
-endif ()
-find_package(${WITH_DDS} REQUIRED COMPONENTS ${DDS_PROVIDER_COMP})
+    add_library(
+        DdsKit
+        SHARED
+            "DdsKit/BaseDdsTopic.cpp"
+            "DdsKit/BaseDdsTopic.h"
+            "DdsKit/BasicDdsParticipant.cpp"
+            "DdsKit/BasicDdsParticipant.h"
+            "DdsKit/ConfiguredDdsTopic.h"
+            "DdsKit/dds_provider_ids.h"
+            "DdsKit/DdsErrorException.cpp"
+            "DdsKit/DdsErrorException.h"
+            "DdsKit/DdsKit.h"
+            "DdsKit/PeerMonitoring.cpp"
+            "DdsKit/PeerMonitoring.h"
+            "DdsKit/seq_utils.h"
+            "DdsKit/string_utils.cpp"
+            "DdsKit/string_utils.h"
+            "DdsKit/TargetedSampleCallback.h"
+            "DdsKit/TargetedSampleCallbackWithPredT.h"
+            "DdsKit/ThroughputCap.cpp"
+            "DdsKit/ThroughputCap.h"
+    )
 
-add_library(
-    DdsKit
-    SHARED
-        "DdsKit/BaseDdsTopic.cpp"
-        "DdsKit/BaseDdsTopic.h"
-        "DdsKit/BasicDdsParticipant.cpp"
-        "DdsKit/BasicDdsParticipant.h"
-        "DdsKit/ConfiguredDdsTopic.h"
-        "DdsKit/dds_provider_ids.h"
-        "DdsKit/DdsErrorException.cpp"
-        "DdsKit/DdsErrorException.h"
-        "DdsKit/DdsKit.h"
-        "DdsKit/PeerMonitoring.cpp"
-        "DdsKit/PeerMonitoring.h"
-        "DdsKit/seq_utils.h"
-        "DdsKit/string_utils.cpp"
-        "DdsKit/string_utils.h"
-        "DdsKit/TargetedSampleCallback.h"
-        "DdsKit/TargetedSampleCallbackWithPredT.h"
-        "DdsKit/ThroughputCap.cpp"
-        "DdsKit/ThroughputCap.h"
-)
+    file(READ "${dds_frag_file_name}" dds_provider_includes)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/DdsKit/dds_provider.h.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/DdsKit/dds_provider.h"
+    )
 
-file(READ "${dds_frag_file_name}" dds_provider_includes)
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/DdsKit/dds_provider.h.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/DdsKit/dds_provider.h"
-)
+    message (STATUS "PIPE2_FOUND=${PIPE2_FOUND}")
+    target_compile_definitions(
+        DdsKit
+        PRIVATE
+            $<$<BOOL:PIPE2_FOUND>:HAVE_PIPE2=1>
+            ${OS_SDK_DEFINES}
+        PUBLIC
+            ${PUBLIC_DEFINES}
+    )
 
-message (STATUS "PIPE2_FOUND=${PIPE2_FOUND}")
-target_compile_definitions(
-    DdsKit
-    PRIVATE
-        $<$<BOOL:PIPE2_FOUND>:HAVE_PIPE2=1>
-        ${OS_SDK_DEFINES}
-    PUBLIC
-        ${PUBLIC_DEFINES}
-)
+    target_include_directories(
+        DdsKit
+        PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/DdsKit"
+        PUBLIC
+            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+            $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
+            $<INSTALL_INTERFACE:include>
+    )
 
-target_include_directories(
-    DdsKit
-    PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/DdsKit"
-    PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
-        $<INSTALL_INTERFACE:include>
-)
+    target_link_libraries(
+        DdsKit
+        PUBLIC
+            CoreKit
+            ${DDS_PROVIDER_LIB}
+    )
 
-target_link_libraries(
-    DdsKit
-    PUBLIC
-        CoreKit
-        ${DDS_PROVIDER_LIB}
-)
+    target_compile_features(
+        DdsKit PUBLIC cxx_std_17
+    )
 
-target_compile_features(
-    DdsKit PUBLIC cxx_std_11
-)
+    set_target_properties(
+        DdsKit
+        PROPERTIES
+            VERSION ${PROJECT_VERSION}
+            SOVERSION 0
+    )
+endif (WITH_DDSKIT STREQUAL "Classic")
 
-set_target_properties(
-    DdsKit
-    PROPERTIES
-        VERSION ${PROJECT_VERSION}
-        SOVERSION 0
-)
+# =============================================================================
+# ISO C++ DdsKit build plan
+# =============================================================================
+
+if (WITH_DDSKIT STREQUAL "ISO")
+    if (WITH_DDS STREQUAL "CycloneDDS-CXX")
+        unset (DDS_PROVIDER_COMP)
+        set (DDS_PROVIDER_LIB "CycloneDDS-CXX::ddscxx")
+        find_package(iceoryx_binding_c REQUIRED)
+        find_package(${WITH_DDS} REQUIRED)
+    elseif (WITH_DDS STREQUAL "CoreDX")
+        set (DDS_PROVIDER_COMP "IsoCxx")
+        set (DDS_PROVIDER_LIB "CoreDX::IsoCxx")
+        find_package(${WITH_DDS} REQUIRED COMPONENTS ${DDS_PROVIDER_COMP})
+    else ()
+        message (FATAL_ERROR "Missing or unknown DDS provider '${WITH_DDS}'.")
+    endif ()
+
+    add_library(
+        IsoDdsKit
+        SHARED
+            "IsoDdsKit/BasicRandomIdSource.cpp"
+            "IsoDdsKit/BasicRandomIdSource.hpp"
+            "IsoDdsKit/DdsEnabledAppDelegate.cpp"
+            "IsoDdsKit/DdsEnabledAppDelegate.hpp"
+            "IsoDdsKit/DeferredActions.cpp"
+            "IsoDdsKit/DeferredActions.hpp"
+            "IsoDdsKit/EmitNewReaderDataAction.hpp"
+            "IsoDdsKit/EmitStatusAction.hpp"
+            "IsoDdsKit/IsoDdsKit.h"
+            "IsoDdsKit/ReaderContext.hpp"
+            "IsoDdsKit/ReaderStimuliMux.hpp"
+            "IsoDdsKit/TopicCollection.cpp"
+            "IsoDdsKit/TopicCollection.hpp"
+            "IsoDdsKit/UniqueIdSource.hpp"
+            "IsoDdsKit/ValueDistribution.hpp"
+            "IsoDdsKit/WriterContext.hpp"
+            "IsoDdsKit/WriterStimuliMux.hpp"
+            "IsoDdsKit/status_types.hpp"
+    )
+    target_compile_definitions(
+        IsoDdsKit
+        PRIVATE
+            $<$<BOOL:PIPE2_FOUND>:HAVE_PIPE2=1>
+            ${OS_SDK_DEFINES}
+        PUBLIC
+            ${PUBLIC_DEFINES}
+    )
+
+    target_include_directories(
+        IsoDdsKit
+        PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/IsoDdsKit"
+        PUBLIC
+            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+            $<INSTALL_INTERFACE:include>
+    )
+
+    target_link_libraries(
+        IsoDdsKit
+        PUBLIC
+            CoreKit
+            ${DDS_PROVIDER_LIB}
+    )
+
+    target_compile_features(
+        IsoDdsKit PUBLIC cxx_std_17
+    )
+
+    set_target_properties(
+        IsoDdsKit
+        PROPERTIES
+            VERSION ${PROJECT_VERSION}
+            SOVERSION 0
+    )
+endif (WITH_DDSKIT STREQUAL "ISO")
 
 # =============================================================================
 # NetworkKit build plan
@@ -364,7 +444,7 @@ target_link_libraries(NetworkKit PUBLIC CoreKit)
 target_compile_features(
     NetworkKit
     PUBLIC
-        cxx_std_11
+        cxx_std_17
 )
 
 set_target_properties(
@@ -419,7 +499,7 @@ target_link_libraries(
 target_compile_features(
     SerialKit
     PUBLIC
-        cxx_std_11
+        cxx_std_17
 )
 
 set_target_properties(
@@ -433,13 +513,15 @@ set_target_properties(
 # Foundation library installation plan
 # =============================================================================
 
+list(APPEND INSTALL_TARGETS CoreKit NetworkKit SerialKit CanBusKit)
+if (WITH_DDSKIT STREQUAL "Classic")
+    list(APPEND INSTALL_TARGETS DdsKit)
+elseif (WITH_DDSKIT STREQUAL "ISO")
+    list(APPEND INSTALL_TARGETS IsoDdsKit)
+endif ()
+
 install(
-    TARGETS
-        CoreKit
-        NetworkKit
-        SerialKit
-        CanBusKit
-        DdsKit
+    TARGETS ${INSTALL_TARGETS}
     EXPORT
         FoundationTargets
     COMPONENT
@@ -536,26 +618,45 @@ install(
         Dev
 )
 
+
+if (WITH_DDSKIT STREQUAL "Classic")
+    install(
+        FILES
+            "DdsKit/BaseDdsTopic.h"
+            "DdsKit/BasicDdsParticipant.h"
+            "DdsKit/ConfiguredDdsTopic.h"
+            "DdsKit/dds_provider_ids.h"
+            "DdsKit/DdsErrorException.h"
+            "DdsKit/DdsKit.h"
+            "DdsKit/PeerMonitoring.h"
+            "DdsKit/seq_utils.h"
+            "DdsKit/string_utils.h"
+            "DdsKit/TargetedSampleCallback.h"
+            "DdsKit/TargetedSampleCallbackWithPredT.h"
+            "DdsKit/ThroughputCap.h"
+            "${CMAKE_CURRENT_BINARY_DIR}/DdsKit/dds_provider.h"
+        DESTINATION
+            "include/DdsKit"
+        COMPONENT
+            Dev
+    )
+elseif (WITH_DDSKIT STREQUAL "ISO")
+get_target_property(ISO_DDS_KIT_SOURCES IsoDdsKit SOURCES)
+foreach (AN_ISO_DDS_KIT_SOURCE ${ISO_DDS_KIT_SOURCES})
+    get_filename_component(ISO_DDS_KIT_SOURCE_EXT "${AN_ISO_DDS_KIT_SOURCE}" LAST_EXT)
+    if ((${ISO_DDS_KIT_SOURCE_EXT} STREQUAL ".hpp") OR (${ISO_DDS_KIT_SOURCE_EXT} STREQUAL ".h"))
+        list (APPEND ISO_DDS_KIT_HEADERS "${AN_ISO_DDS_KIT_SOURCE}")
+    endif ()
+endforeach ()
 install(
     FILES
-        "DdsKit/BaseDdsTopic.h"
-        "DdsKit/BasicDdsParticipant.h"
-        "DdsKit/ConfiguredDdsTopic.h"
-        "DdsKit/dds_provider_ids.h"
-        "DdsKit/DdsErrorException.h"
-        "DdsKit/DdsKit.h"
-        "DdsKit/PeerMonitoring.h"
-        "DdsKit/seq_utils.h"
-        "DdsKit/string_utils.h"
-        "DdsKit/TargetedSampleCallback.h"
-        "DdsKit/TargetedSampleCallbackWithPredT.h"
-        "DdsKit/ThroughputCap.h"
-        "${CMAKE_CURRENT_BINARY_DIR}/DdsKit/dds_provider.h"
+        ${ISO_DDS_KIT_HEADERS}
     DESTINATION
-        "include/DdsKit"
+        "include/IsoDdsKit"
     COMPONENT
         Dev
 )
+endif ()
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
@@ -604,7 +705,7 @@ set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${PROJECT_VERSION}-${WITH_DDS}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${PROJECT_VERSION}-${WITH_DDS}-${WITH_DDSKIT}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
 set(CPACK_PACKAGE_CONTACT "Rolando J. Nieves <rolando.j.nieves@nasa.gov>")
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
     set(CPACK_GENERATOR "DEB")

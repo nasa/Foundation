@@ -1,18 +1,10 @@
-# Licensed for U.S. Government use only.
 #.rst:
 # FindCoreDX
 # ----------
 #
 # Finds all of the feature variants of the CoreDX DDS libraries.
 #
-# This will define the following variables::
-#
-#   CoreDX_FOUND        - TRUE if CoreDX was found
-#   CoreDX_INCLUDE_DIRS - List of directories to add to dependent target include path
-#   CoreDX_LIBRARIES    - List of libraries to add to dependent target
-#   CoreDX_DDLC         - Path to IDL compiler executable
-#
-# and some of the following imported targets depending on what features were required::
+# This will define the following imported targets depending on what features were required::
 #
 #   CoreDX::C              - The CoreDX C library
 #   CoreDX::Ccf            - The CoreDX C library supporting content-filtered topics.
@@ -21,231 +13,144 @@
 #   CoreDX::Cxx            - The CoreDX C++ library
 #   CoreDX::Cxxcf          - The CoreDX C++ library supporting content-filtered topics.
 #   CoreDX::Cxxdyntype     - The CoreDX C++ library supporting dynamic types.
+#   CoreDX::DdlCompiler    - The CoreDX DDL compiler executable.
+#   CoreDX::DdsXml         - The CoreDX XML interface library
+#   CoreDX::IsoCxx         - The CoreDX ISO/IEC C++ PSM (i.e., "modern C++") library
+#   CoreDX::QosProvider    - The CoreDX QoS provider library
+#
+# This will also define the following cache variable::
+#
+#   CoreDX_DDLC  - Location of the CoreDX DDL compiler.
+
+# The following ``set()`` calls will not change the value for the CMake cache
+# variables if they have already been initialized by the user via other means
+# (e.g., the command line or ``cmake-gui``). See:
+# `CMake Set Command <https://cmake.org/cmake/help/latest/command/set.html#set-cache-entry>`_
+set (CoreDX_ROOT "$ENV{COREDX_TOP}" CACHE PATH "Path to root of CoreDX installation")
+set (CoreDX_TARGET "$ENV{COREDX_TARGET}" CACHE STRING "CoreDX target platform identifier")
+set (CoreDX_HOST "$ENV{COREDX_HOST}" CACHE STRING "CoreDX host platform identifier")
+
+include (FindPackageHandleStandardArgs)
+
+find_package_handle_standard_args(
+    CoreDX
+    REQUIRED_VARS CoreDX_ROOT CoreDX_TARGET CoreDX_HOST
+)
+set (_isocxx_requested FALSE)
+list(FIND CoreDX_FIND_COMPONENTS "IsoCxx" _isocxx_index)
+if (NOT _isocxx_index EQUAL -1)
+    set (_isocxx_requested TRUE)
+    message (STATUS "CoreDX ISO/IEC C++ PSM Requested")
+endif ()
 
 find_path(CoreDX_INCLUDE_DIR
     NAMES dds/dds.h
     PATHS
-        ${CoreDX_ROOT_DIR}/target/include
-        $ENV{COREDX_TOP}/target/include
+        "${CoreDX_ROOT}/target/include"
+    DOC "Path to directory with CoreDX C and classic C++ headers."
     CMAKE_FIND_ROOT_PATH_BOTH
 )
 
-find_program(CoreDX_DDLC
-    NAMES coredx_ddl
-    PATHS ${CoreDX_ROOT_DIR}/host/${CoreDX_HOST}/bin
-    $ENV{COREDX_TOP}/host/$ENV{COREDX_HOST}/bin
-)
+find_path(CoreDX_IsoCxx_INCLUDE_DIR NAMES "dds/dds.hpp" PATHS "${CoreDX_ROOT}/target/include/dds_cxx" DOC "Path to CoreDX ISO/IEC C++ PSM headers." CMAKE_FIND_ROOT_PATH_BOTH)
 
-if(DEFINED CoreDX_ROOT_DIR AND DEFINED CoreDX_TARGET)
-    list(APPEND COREDX_LIBRARY_SEARCH_PATHS ${CoreDX_ROOT_DIR}/target/${CoreDX_TARGET}/lib)
-endif()
-list(APPEND COREDX_LIBRARY_SEARCH_PATHS $ENV{COREDX_TOP}/target/$ENV{COREDX_TARGET}/lib)
-
-macro (COREDX_FIND_DEBUG_AND_RELEASE_LIB BASENAME VAR_FRAG)
-    find_library(CoreDX_${VAR_FRAG}_LIBRARY_RELEASE
-        NAMES ${BASENAME}
-        PATHS ${COREDX_LIBRARY_SEARCH_PATHS}
-        CMAKE_FIND_ROOT_PATH_BOTH
-    )
-    find_library(CoreDX_${VAR_FRAG}_LIBRARY_DEBUG
-        NAMES ${BASENAME}_log
-        PATHS ${COREDX_LIBRARY_SEARCH_PATHS}
-        CMAKE_FIND_ROOT_PATH_BOTH
-    )
-endmacro (COREDX_FIND_DEBUG_AND_RELEASE_LIB)
-
-coredx_find_debug_and_release_lib(dds C)
-coredx_find_debug_and_release_lib(dds_cf Ccf)
-coredx_find_debug_and_release_lib(dds_dyntype Cdyntype)
-find_library(CoreDX_Cdyntypexml_LIBRARY
-    NAMES dds_dyntype_xml
-    PATHS ${COREDX_LIBRARY_SEARCH_PATHS}
-    CMAKE_FIND_ROOT_PATH_BOTH
-)
-coredx_find_debug_and_release_lib(dds_cpp Cxx)
-coredx_find_debug_and_release_lib(dds_cpp_cf Cxxcf)
-coredx_find_debug_and_release_lib(dds_cpp_dyntype Cxxdyntype)
-
-list(APPEND CoreDX_REQUIRED_VARS CoreDX_INCLUDE_DIR)
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    list(APPEND CoreDX_REQUIRED_VARS CoreDX_C_LIBRARY_DEBUG)
-    if(CoreDX_FIND_REQUIRED_Cdyntypexml)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Cdyntypexml_LIBRARY)
-    endif()
-    if(CoreDX_FIND_REQUIRED_Cdyntype)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Cdyntype_LIBRARY_DEBUG)
-    endif()
-    if(CoreDX_FIND_REQUIRED_Ccf)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Ccf_LIBRARY_DEBUG)
-    endif()
-    if(CoreDX_FIND_REQUIRED_Cxxdyntype)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Cxxdyntype_LIBRARY_DEBUG CoreDX_Cxx_LIBRARY_DEBUG CoreDX_Cdyntype_LIBRARY_DEBUG)
-    endif()
-    if(CoreDX_FIND_REQUIRED_Cxxcf)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Cxxcf_LIBRARY_DEBUG CoreDX_Cxx_LIBRARY_DEBUG CoreDX_Ccf_LIBRARY_DEBUG)
-    endif()
-    if(CoreDX_FIND_REQUIRED_Cxx)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Cxx_LIBRARY_DEBUG)
-    endif()
-else()
-    list(APPEND CoreDX_REQUIRED_VARS CoreDX_C_LIBRARY_RELEASE)
-    if(CoreDX_FIND_REQUIRED_Cdyntypexml)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Cdyntypexml_LIBRARY)
-    endif()
-    if(CoreDX_FIND_REQUIRED_Cdyntype)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Cdyntype_LIBRARY_RELEASE)
-    endif()
-    if(CoreDX_FIND_REQUIRED_Ccf)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Ccf_LIBRARY_RELEASE)
-    endif()
-    if(CoreDX_FIND_REQUIRED_Cxxdyntype)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Cxxdyntype_LIBRARY_RELEASE CoreDX_Cxx_LIBRARY_RELEASE CoreDX_Cdyntype_LIBRARY_RELEASE)
-    endif()
-    if(CoreDX_FIND_REQUIRED_Cxxcf)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Cxxcf_LIBRARY_RELEASE CoreDX_Cxx_LIBRARY_RELEASE CoreDX_Ccf_LIBRARY_RELEASE)
-    endif()
-    if(CoreDX_FIND_REQUIRED_Cxx)
-        list(APPEND CoreDX_REQUIRED_VARS CoreDX_Cxx_LIBRARY_RELEASE)
-    endif()
-endif()
-
-list(REMOVE_DUPLICATES CoreDX_REQUIRED_VARS)
-
-include (FindPackageHandleStandardArgs)
-
-find_package_handle_standard_args(CoreDX
-    FOUND_VAR CoreDX_FOUND
-    REQUIRED_VARS ${CoreDX_REQUIRED_VARS}
-)
-
-if (CoreDX_FOUND)
-    # Classic approach of defining variables
-    list(GET CoreDX_REQUIRED_VARS 0 CoreDX_INCLUDE_DIRS_VAR)
-    list(REMOVE_AT CoreDX_REQUIRED_VARS 0)
-    set(CoreDX_INCLUDE_DIRS ${${CoreDX_INCLUDE_DIRS_VAR}})
-    unset(CoreDX_INCLUDE_DIRS_VAR)
-    foreach(A_CoreDX_LIB_VAR IN LISTS CoreDX_REQUIRED_VARS)
-        list(APPEND CoreDX_LIBRARIES ${${A_CoreDX_LIB_VAR}})
-    endforeach(A_CoreDX_LIB_VAR)
-    unset(A_CoreDX_LIB_VAR)
-
-    # Modern approach of defining imported targets
-    if (NOT TARGET CoreDX::C)
-        add_library(CoreDX::C UNKNOWN IMPORTED)
-    endif ()
-    if (CoreDX_C_LIBRARY_RELEASE)
-        set_property(TARGET CoreDX::C APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-        set_target_properties(CoreDX::C PROPERTIES IMPORTED_LOCATION_RELEASE "${CoreDX_C_LIBRARY_RELEASE}")
-    endif ()
-    if (CoreDX_C_LIBRARY_DEBUG)
-        set_property(TARGET CoreDX::C APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-        set_target_properties(CoreDX::C PROPERTIES IMPORTED_LOCATION_DEBUG "${CoreDX_C_LIBRARY_DEBUG}")
-    endif ()
-    set_target_properties(CoreDX::C PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CoreDX_INCLUDE_DIR}")
-
-    if (CoreDX_FIND_REQUIRED_Ccf OR CoreDX_FIND_REQUIRED_Cxxcf)
-        if (NOT TARGET CoreDX::Ccf)
-            add_library(CoreDX::Ccf UNKNOWN IMPORTED)
-        endif ()
-        if (CoreDX_Ccf_LIBRARY_RELEASE)
-            set_property(TARGET CoreDX::Ccf APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-            set_target_properties(CoreDX::Ccf PROPERTIES IMPORTED_LOCATION_RELEASE "${CoreDX_Ccf_LIBRARY_RELEASE}")
-        endif ()
-        if (CoreDX_Ccf_LIBRARY_DEBUG)
-            set_property(TARGET CoreDX::Ccf APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(CoreDX::Ccf PROPERTIES IMPORTED_LOCATION_DEBUG "${CoreDX_Ccf_LIBRARY_DEBUG}")
-        endif ()
-        set_target_properties(CoreDX::Ccf PROPERTIES INTERFACE_LINK_LIBRARIES CoreDX::C)
-    endif ()
-
-    if (CoreDX_FIND_REQUIRED_Cdyntype OR CoreDX_FIND_REQUIRED_Cdyntypexml OR CoreDX_FIND_REQUIRED_Cxxdyntype)
-        if (NOT TARGET CoreDX::Cdyntype)
-            add_library(CoreDX::Cdyntype UNKNOWN IMPORTED)
-        endif ()
-        if (CoreDX_Cdyntype_LIBRARY_RELEASE)
-            set_property(TARGET CoreDX::Cdyntype APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-            set_target_properties(CoreDX::Cdyntype PROPERTIES IMPORTED_LOCATION_RELEASE "${CoreDX_Cdyntype_LIBRARY_RELEASE}")
-        endif ()
-        if (CoreDX_Cdyntype_LIBRARY_DEBUG)
-            set_property(TARGET CoreDX::Cdyntype APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(CoreDX::Cdyntype PROPERTIES IMPORTED_LOCATION_DEBUG "${CoreDX_Cdyntype_LIBRARY_DEBUG}")
-        endif ()
-        set_target_properties(CoreDX::Cdyntype PROPERTIES INTERFACE_LINK_LIBRARIES CoreDX::C)
-    endif ()
-
-    if (CoreDX_FIND_REQUIRED_Cdyntypexml)
-        if (NOT TARGET CoreDX::Cdyntypexml)
-            add_library(CoreDX::Cdyntypexml UNKNOWN IMPORTED)
-        endif ()
-        set_target_properties(CoreDX::Cdyntypexml PROPERTIES 
-            IMPORTED_LOCATION "${CoreDX_Cdyntypexml_LIBRARY}"
-            INTERFACE_LINK_LIBRARIES CoreDX::Cdyntype
-        )
-    endif ()
-
-    if (CoreDX_FIND_REQUIRED_Cxx OR CoreDX_FIND_REQUIRED_Cxxcf OR CoreDX_FIND_REQUIRED_Cxxdyntype)
-        if (NOT TARGET CoreDX::Cxx)
-            add_library(CoreDX::Cxx UNKNOWN IMPORTED)
-        endif ()
-        if (CoreDX_Cxx_LIBRARY_RELEASE)
-            set_property(TARGET CoreDX::Cxx APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-            set_target_properties(CoreDX::Cxx PROPERTIES IMPORTED_LOCATION_RELEASE "${CoreDX_Cxx_LIBRARY_RELEASE}")
-        endif ()
-        if (CoreDX_Cxx_LIBRARY_DEBUG)
-            set_property(TARGET CoreDX::Cxx APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(CoreDX::Cxx PROPERTIES IMPORTED_LOCATION_DEBUG "${CoreDX_Cxx_LIBRARY_DEBUG}")
-        endif ()
-        set_target_properties(CoreDX::Cxx PROPERTIES INTERFACE_LINK_LIBRARIES CoreDX::C)
-    endif ()
-
-    if (CoreDX_FIND_REQUIRED_Cxxcf)
-        if (NOT TARGET CoreDX::Cxxcf)
-            add_library(CoreDX::Cxxcf UNKNOWN IMPORTED)
-        endif ()
-        if (CoreDX_Cxxcf_LIBRARY_RELEASE)
-            set_property(TARGET CoreDX::Cxxcf APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-            set_target_properties(CoreDX::Cxxcf PROPERTIES IMPORTED_LOCATION_RELEASE "${CoreDX_Cxxcf_LIBRARY_RELEASE}")
-        endif ()
-        if (CoreDX_Cxxcf_LIBRARY_DEBUG)
-            set_property(TARGET CoreDX::Cxxcf APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(CoreDX::Cxxcf PROPERTIES IMPORTED_LOCATION_DEBUG "${CoreDX_Cxxcf_LIBRARY_DEBUG}")
-        endif ()
-        set_target_properties(CoreDX::Cxxcf PROPERTIES INTERFACE_LINK_LIBRARIES "CoreDX::Cxx;CoreDX::Ccf")
-    endif ()
-
-    if (CoreDX_FIND_REQUIRED_Cxxdyntype)
-        if (NOT TARGET CoreDX::Cxxdyntype)
-            add_library(CoreDX::Cxxdyntype UNKNOWN IMPORTED)
-        endif ()
-        if (CoreDX_Cxxdyntype_LIBRARY_RELEASE)
-            set_property(TARGET CoreDX::Cxxdyntype APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-            set_target_properties(CoreDX::Cxxdyntype PROPERTIES IMPORTED_LOCATION_RELEASE "${CoreDX_Cxxdyntype_LIBRARY_RELEASE}")
-        endif ()
-        if (CoreDX_Cxxcf_LIBRARY_DEBUG)
-            set_property(TARGET CoreDX::Cxxdyntype APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(CoreDX::Cxxdyntype PROPERTIES IMPORTED_LOCATION_DEBUG "${CoreDX_Cxxdyntype_LIBRARY_DEBUG}")
-        endif ()
-        set_target_properties(CoreDX::Cxxdyntype PROPERTIES INTERFACE_LINK_LIBRARIES "CoreDX::Cxx;CoreDX::Cdyntype")
+if (NOT CoreDX_INCLUDE_DIR MATCHES "NOTFOUND")
+    set (CoreDX_INCLUDE_DIRS "${CoreDX_INCLUDE_DIR}" CACHE STRING "Semicolon-separated list of CoreDX include directories")
+    if (_isocxx_requested AND (NOT CoreDX_IsoCxx_INCLUDE_DIR MATCHES "NOTFOUND"))
+        list(APPEND CoreDX_INCLUDE_DIRS "${CoreDX_IsoCxx_INCLUDE_DIR}")
     endif ()
 endif ()
 
-mark_as_advanced(
-    CoreDX_INCLUDE_DIR
-    CoreDX_C_LIBRARY_DEBUG
-    CoreDX_C_LIBRARY_RELEASE
-    CoreDX_Ccf_LIBRARY_DEBUG
-    CoreDX_Ccf_LIBRARY_RELEASE
-    CoreDX_Cdyntype_LIBRARY_DEBUG
-    CoreDX_Cdyntype_LIBRARY_RELEASE
-    CoreDX_Cdyntypexml_LIBRARY
-    CoreDX_Cxx_LIBRARY_DEBUG
-    CoreDX_Cxx_LIBRARY_RELEASE
-    CoreDX_Cxxcf_LIBRARY_DEBUG
-    CoreDX_Cxxcf_LIBRARY_RELEASE
-    CoreDX_Cxxdyntype_LIBRARY_DEBUG
-    CoreDX_Cxxdyntype_LIBRARY_RELEASE
+find_program(CoreDX_DDLC
+    NAMES coredx_ddl
+    PATHS
+        "${CoreDX_ROOT}/host/${CoreDX_HOST}/bin"
 )
+if (NOT CoreDX_DDLC MATCHES "NOTFOUND")
+    add_executable(CoreDX::DdlCompiler IMPORTED)
+    set_property(TARGET CoreDX::DdlCompiler PROPERTY IMPORTED_LOCATION "${CoreDX_DDLC}")
+endif ()
+
+function (COREDX_CREATE_LIBRARY_TARGET)
+    set(_OPTION_ARGS "CHAIN")
+    set(_ONE_VALUE_ARGS "COMPONENT" "LIB_BASE_NAME")
+    set(_MULTI_VALUE_ARGS "DEPENDENCIES")
+    cmake_parse_arguments(CCLT "${_OPTION_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN})
+    # Do not create any targets if required include directory (or directories) were not found
+    if (CoreDX_INCLUDE_DIR MATCHES "NOTFOUND")
+        return()
+    endif()
+    if (_isocxx_requested AND (CoreDX_IsoCxx_INCLUDE_DIR MATCHES "NOTFOUND"))
+        return()
+    endif()
+    find_library(CoreDX_${CCLT_COMPONENT}_LIBRARY NAMES ${CCLT_LIB_BASE_NAME} PATHS "${CoreDX_ROOT}/target/${CoreDX_TARGET}/lib" DOC "Location of CoreDX ${CCLT_COMPONENT} library." CMAKE_FIND_ROOT_PATH_BOTH)
+    find_library(CoreDX_${CCLT_COMPONENT}_DBG_ADD_ON_LIBRARY NAMES ${CCLT_LIB_BASE_NAME}_log PATHS "${CoreDX_ROOT}/target/${CoreDX_TARGET}/lib" DOC "Location of CoreDX ${CCLT_COMPONENT} debug add-on library." CMAKE_FIND_ROOT_PATH_BOTH)
+    if (CCLT_CHAIN)
+        if (NOT CoreDX_${CCLT_COMPONENT}_LIBRARY MATCHES "NOTFOUND")
+            add_library(CoreDX::${CCLT_COMPONENT} UNKNOWN IMPORTED)
+            # If "_log" add-on is available, create chain from baseline to it,
+            # otherwise, just use baseline
+            if ((CMAKE_BUILD_TYPE MATCHES "Debug") AND (NOT CoreDX_${CCLT_COMPONENT}_DBG_ADD_ON_LIBRARY MATCHES "NOTFOUND"))
+                add_library(CoreDX::${CCLT_COMPONENT}Base UNKNOWN IMPORTED)
+                set_property(TARGET CoreDX::${CCLT_COMPONENT} PROPERTY IMPORTED_LOCATION "${CoreDX_${CCLT_COMPONENT}_DBG_ADD_ON_LIBRARY}")
+                set_property(TARGET CoreDX::${CCLT_COMPONENT}Base PROPERTY IMPORTED_LOCATION "${CoreDX_${CCLT_COMPONENT}_LIBRARY}")
+                set_property(TARGET CoreDX::${CCLT_COMPONENT} PROPERTY INTERFACE_LINK_LIBRARIES "CoreDX::${CCLT_COMPONENT}Base")
+            else ()
+                set_property(TARGET CoreDX::${CCLT_COMPONENT} PROPERTY IMPORTED_LOCATION "${CoreDX_${CCLT_COMPONENT}_LIBRARY}")
+            endif ()
+        endif ()
+    else ()
+        if (CMAKE_BUILD_TYPE MATCHES "Debug")
+            # Pick "_log" variant if available, otherwise baseline.
+            if (NOT CoreDX_${CCLT_COMPONENT}_LIBRARY MATCHES "NOTFOUND")
+                add_library(CoreDX::${CCLT_COMPONENT} UNKNOWN IMPORTED)
+                if (NOT CoreDX_${CCLT_COMPONENT}_DBG_ADD_ON_LIBRARY MATCHES "NOTFOUND")
+                    set_property(TARGET CoreDX::${CCLT_COMPONENT} PROPERTY IMPORTED_LOCATION "${CoreDX_${CCLT_COMPONENT}_DBG_ADD_ON_LIBRARY}")
+                else ()
+                    set_property(TARGET CoreDX::${CCLT_COMPONENT} PROPERTY IMPORTED_LOCATION "${CoreDX_${CCLT_COMPONENT}_LIBRARY}")
+                endif ()
+            endif ()
+        else ()
+            # Pick baseline variant.
+            if (NOT CoreDX_${CCLT_COMPONENT}_LIBRARY MATCHES "NOTFOUND")
+                add_library(CoreDX::${CCLT_COMPONENT} UNKNOWN IMPORTED)
+                set_property(TARGET CoreDX::${CCLT_COMPONENT} PROPERTY IMPORTED_LOCATION "${CoreDX_${CCLT_COMPONENT}_LIBRARY}")
+            endif ()
+        endif ()
+    endif ()
+    if (TARGET CoreDX::${CCLT_COMPONENT})
+        if (DEFINED CCLT_DEPENDENCIES)
+            # This assumes the dependencies are all internal to CoreDX. If
+            # this were to evolve so that dependencies external to CoreDX
+            # must be added as well, the logic will need to be revised.
+            list(TRANSFORM CCLT_DEPENDENCIES PREPEND "CoreDX::")
+            set_property(TARGET CoreDX::${CCLT_COMPONENT} APPEND PROPERTY INTERFACE_LINK_LIBRARIES "${CCLT_DEPENDENCIES}")
+        else ()
+            set_property(TARGET CoreDX::${CCLT_COMPONENT} PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CoreDX_INCLUDE_DIRS}")
+        endif ()
+    endif ()
+    mark_as_advanced(CoreDX_${CCLT_COMPONENT}_LIBRARY CoreDX_${CCLT_COMPONENT}_DBG_ADD_ON_LIBRARY)
+endfunction ()
+
+coredx_create_library_target(COMPONENT C LIB_BASE_NAME dds)
+coredx_create_library_target(COMPONENT Ccf LIB_BASE_NAME dds_cf CHAIN DEPENDENCIES C)
+coredx_create_library_target(COMPONENT Cdyntype LIB_BASE_NAME dds_dyntype CHAIN DEPENDENCIES C)
+coredx_create_library_target(COMPONENT Cdyntypexml LIB_BASE_NAME dds_dyntype_xml DEPENDENCIES Cdyntype)
+coredx_create_library_target(COMPONENT Cxx LIB_BASE_NAME dds_cpp DEPENDENCIES C)
+coredx_create_library_target(COMPONENT Cxxcf LIB_BASE_NAME dds_cpp_cf DEPENDENCIES Cxx Ccf)
+coredx_create_library_target(COMPONENT Cxxdyntype LIB_BASE_NAME dds_cpp_dyntype DEPENDENCIES Cxx Cdyntype)
+coredx_create_library_target(COMPONENT DdsXml LIB_BASE_NAME dds_xml CHAIN DEPENDENCIES C)
+coredx_create_library_target(COMPONENT QosProvider LIB_BASE_NAME dds_qos_provider DEPENDENCIES C)
+coredx_create_library_target(COMPONENT IsoCxx LIB_BASE_NAME dds_cxx DEPENDENCIES Cdyntypexml Cdyntype QosProvider DdsXml Ccf C)
+
+foreach (_req_component IN LISTS CoreDX_FIND_COMPONENTS)
+    if (TARGET CoreDX::${_req_component})
+        message(STATUS "Found CoreDX component ``${_req_component}``")
+    elseif (CoreDX_FIND_REQUIRED_${_req_component})
+        message(FATAL_ERROR "Could not find required CoreDX component ``${_req_component}``")
+    endif ()
+endforeach ()
+
+mark_as_advanced(CoreDX_INCLUDE_DIR CoreDX_IsoCxx_INCLUDE_DIR)
 
 # vim: set ts=4 sw=4 expandtab:
 
