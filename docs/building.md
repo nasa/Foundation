@@ -25,9 +25,12 @@ tested against the Foundation SDK:
 * For the build tool:
   * [Ninja] build tool version 1.12.1 or newer (preferred)
   * GNU Make
-* For the DDS distribution:
-  * [CoreDX] version 5 or newer from Twin Oaks Computing, Inc. (preferred)
-  * [OpenSplice][OpenSplice Community Edition] version 6.9 or newer from ADLINK
+* For the DDS distribution (when using `DdsKit`):
+  * [CoreDX] version 5 or newer from Twin Oaks Computing, Inc.
+  * [OpenSplice Community Edition][OpenSplice] version 6.9 or newer from ADLINK
+* For the DDS distribution (when using `IsoDdsKit`):
+  * [CoreDX] version 5.19 or newer, built against GCC 5 or newer, from Twin Oaks Computing, Inc.
+  * [Cyclone DDS][CycloneDDS] version 0.10.5 or newer, built with shared memory ([iceoryx]) and C++ support.
 
 > [!NOTE]
 > All examples in the tutorial assume the following build/runtime
@@ -36,11 +39,12 @@ tested against the Foundation SDK:
 > * OS: Ubuntu Linux on Intel x86-64
 > * C++ compiler: LLVM Clang
 > * Build tool: Ninja
+> * Using `DdsKit` (via the `WITH_DDSKIT=Classic` setting)
 > * DDS distribution: [OpenSplice]
 
 ### DDS Pre-Requisites: CoreDX
 
-When building the Foundation with the CoreDX DDS libraries, the build
+When building the Foundation with the [CoreDX DDS][CoreDX] libraries, the build
 environment must be prepared as follows beforehand:
 
 * CoreDX target and host files must be installed on the host. Typically, Twin
@@ -67,7 +71,7 @@ environment must be prepared as follows beforehand:
 
 ### DDS Pre-Requisites: OpenSplice
 
-When building the Foundation with the OpenSplice libraries, the build
+When building the Foundation with the [OpenSplice] libraries, the build
 environment must be prepared as follows beforehand:
 
 * Follow the [OpenSplice build instructions][OpenSplice_Linux_Build] to produce
@@ -77,14 +81,40 @@ environment must be prepared as follows beforehand:
   Sourcing this script in the shell environment that will be used to run the
   steps in the [Building](#building) section should be sufficient.
 
+> [!NOTE]
+> [OpenSplice] is only supported when the Foundation is configured to build
+> with the `DdsKit` component.
+
+### DDS Pre-Requisites: Cyclone DDS
+
+When building the Foundation with the [Cyclone DDS][CycloneDDS] libraries, the
+build environment need not go through preparatory steps. The only requirement
+is that, when building the Foundation library, the install locations to both
+[iceoryx] and [Cyclone DDS][CycloneDDS] be specified using the CMake
+`CMAKE_PREFIX_PATH` variable. For example, assume the packages are installed
+as follows:
+
+| Package | Location |
+| :------ | :------- |
+| **iceoryx** | `/opt/iceoryx/2.95.0` |
+| **Cyclone DDS** (both C and C++) | `/opt/cyclonedds/0.10.5` |
+
+With those locations, populating the `CMAKE_PREFIX_PATH` variable with the
+value `/opt/iceoryx/2.95.0\;/opt/cyclonedds/0.10.5` (making sure the semicolon
+is escaped) will point the Foundation build plan in the right direction.
+
+> [!NOTE]
+> [Cyclone DDS][CycloneDDS] is only supported when the Foundation is configured
+> to build with the `IsoDdsKit` component.
+
 ## Building
 
 Prior to configuring the Foundation build, users must select what build tool and
 DDS distributions to use. The Foundation can be cross-compiled for an embedded
 target, but for the sake of simplicity these build steps assume the target
-platform is the build host. The steps assume using the [CoreDX] DDS
-distribution, the [Ninja] build tool, and the CLang compiler. Starting from the
-root folder of the Foundation checkout:
+platform is the build host. The steps assume using the [OpenSplice] DDS
+distribution, the [Ninja] build tool, the "classic" `DdsKit`, and the CLang
+compiler. Starting from the root folder of the Foundation checkout:
 
 1. Create a build tree (omit if one already exists):
    ```console
@@ -99,6 +129,7 @@ root folder of the Foundation checkout:
    $ cmake -DCMAKE_BUILD_TYPE=Debug \
      -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
      -DCMAKE_CXX_COMPILER=clang++ \
+     -DWITH_DDSKIT=Classic \
      -DWITH_DDS=OpenSplice \
      -G Ninja \
      ..
@@ -119,6 +150,23 @@ the completed build products.
 > command references [OpenSplice] in order to enhance developer accessibility to
 > the Foundation SDK. If a commercial license for [CoreDX] is available, it can
 > be used with just a change to the `-DWITH_DDS=` configuration line.
+
+### Building with IsoDdsKit
+
+The instructions shown in the [Building](#building) section mostly apply as-is
+when building Foundation with support for the
+[OMG ISO/IEC C++ PSM][OmgIsoCxxPsm] in the `IsoDdsKit` component. The only
+differences manifest in the step used to configure the build tree:
+
+1. Replace the `-DWITH_DDSKIT=Classic` command-line parameter with
+  `-DWITH_DDSKIT=ISO`
+1. Replace the `-DWITH_DDS=` command-line parameter with a reference to a
+  compatible DDS distribution:
+    1. `-DWITH_DDS=CycloneDDS-CXX` for [Cyclone DDS][CycloneDDS].
+    1. `-DWITH_DDS=CoreDX` for [CoreDX].
+1. Add any required build configuration parameters required by the DDS
+  distribution ([Cyclone DDS][CycloneDDS] may need them; see
+  [DDS Pre-Requisites: Cyclone DDS](#dds-pre-requisites-cyclone-dds)).
 
 ### Packaging: TAR/GZ Archives
 
@@ -242,6 +290,9 @@ locations.
 
 [CMake]: https://cmake.org/ "CMake Build System"
 [CoreDX]: https://www.twinoakscomputing.com/coredx "CoreDX DDS"
+[CycloneDDS]: https://cyclonedds.io/ "Cyclone DDS"
 [Ninja]: https://ninja-build.org/ "Ninja Build System"
+[OmgIsoCxxPsm]: https://www.omg.org/spec/DDS-PSM-Cxx/1.0/About-DDS-PSM-Cxx "OMG ISO/IEC C++ PSM"
 [OpenSplice]: https://github.com/ADLINK-IST/opensplice "Vortex OpenSplice Community Edition"
 [OpenSplice_Linux_Build]: https://github.com/ADLINK-IST/opensplice#posix--linux "OpenSplice POSIX/Linux Build Instructions"
+[iceoryx]: https://cyclonedds.io/ "iceoryx Shared Memory IPC"

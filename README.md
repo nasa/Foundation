@@ -80,6 +80,21 @@ message exchange mechanism for application developers. The inherent flexibility
 provided by basic DDS is limited somewhat, but the simplicity dividend to 
 application developers more than makes up for this lost flexibility.
 
+## IsoDdsKit
+The `IsoDdsKit` component leverages the [OMG ISO/IEC C++ PSM][OmgIsoCxxPsm]
+specification to interface with a Data Distribution System (DDS) communication
+bus. Given the modern approach that the aforementioned specification adopts,
+there was no need to further standardize or simplify the application
+developer's interface to DDS. Thus, `IsoDdsKit` focuses exclusively on
+integrating DDS stimuli onto a Foundation-based application, leaving the
+DDS-specific API interactions intact.
+
+> [!NOTE]
+> Although `IsoDdsKit` provides functionality comparable to that of `DdsKit`,
+> the two are mutually-exclusive; developers building a Foundation distribution
+> must choose which DDS integration they plan to use during project build
+> configuration.
+
 ## NetworkKit
 Foundation's NetworkKit component provides tried and true implementations for
 the most common needs for applications required to interact with a network
@@ -120,3 +135,4 @@ to be used with SerialKit must be compatible with the Linux TermIO subsystem.
 
 [SocketCAN]: https://www.kernel.org/doc/html/next/networking/can.html "Linux SocketCAN"
 [TermIO]: https://man7.org/linux/man-pages/man3/termios.3.html "Linux TermIO"
+[OmgIsoCxxPsm]: https://www.omg.org/spec/DDS-PSM-Cxx/1.0/About-DDS-PSM-Cxx "OMG ISO/IEC C++ PSM"
