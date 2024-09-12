@@ -1,0 +1,12 @@
+/**
+ * \brief Auto-generated file that amalgamates all provider-generated headers.
+ */
+
+#ifndef _SAMPLEISOSOFTWAREBUS_SRC_SAMPLEISOSOFTWAREBUS_H_
+#define _SAMPLEISOSOFTWAREBUS_SRC_SAMPLEISOSOFTWAREBUS_H_
+
+@INCLUDE_STATEMENTS@
+
+#endif /* !_SAMPLEISOSOFTWAREBUS_SRC_SAMPLEISOSOFTWAREBUS_H_ */
+
+// vim: set ts=4 sw=4 expandtab:
