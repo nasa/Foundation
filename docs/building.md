@@ -190,8 +190,7 @@ Where:
 * `<version>` - The major.minor.patch version number for the Foundation.
 * `<DDS>` - The DDS distribution used to build (`OpenSplice` in the previous
   example).
-* `<target>` - A label describing the target platform (`Linux-x86_64` in the
-  previous example).
+* `<target>` - A label describing the target platform.
 * `Bin` - Binary libraries needed both at runtime and during development.
 * `Dev` - Header and other supporting files only needed during development.
 
@@ -223,8 +222,7 @@ Where:
 * `bin` - Binary libraries needed both at runtime and during development.
 * `dev` - Header and other supporting files only needed during development.
 * `<version>` - The major.minor.patch version number for the Foundation.
-* `<target>` - A label describing the target platform (`arm64` in the
-  previous example).
+* `<target>` - A label describing the target platform.
 
 ## Using
 
