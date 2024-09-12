@@ -299,6 +299,7 @@ function (CREATE_SB_LIBRARY_TARGETS)
             $<INSTALL_INTERFACE:include/${CSL_TARGET}>
     )
     target_link_libraries(${CSL_TARGET} PUBLIC CycloneDDS-CXX::ddscxx)
+    target_compile_features(${CSL_TARGET} PUBLIC cxx_std_17)
     get_property(_IDLC_SOURCES TARGET ${CSL_TARGET} PROPERTY SOURCES)
     foreach (_IDLC_GEN_FILE ${_IDLC_SOURCES})
         get_filename_component(_IDLC_GEN_FILE_EXT "${_IDLC_GEN_FILE}" LAST_EXT)
