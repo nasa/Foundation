@@ -23,7 +23,6 @@ endif ()
 # -----------------------------------------------------------------------------
 create_sb_library_targets(
     TARGET "${PROJECT_NAME}"
-    OUTPUT "${PROJECT_SOURCE_DIR}/src/${WITH_DDS}"
     IDL_FILES
         "<insert IDL file path>"
 )
@@ -42,8 +41,8 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VERSION ${PROJECT_VERSION})
 get_target_property(HEADERS_TO_INSTALL "${PROJECT_NAME}" IDL_LANG_BINDING_HEADERS)
 
 foreach (_A_HEADER IN LISTS HEADERS_TO_INSTALL)
-    file(RELATIVE_PATH _REL_TO_PROVIDER "${PROJECT_SOURCE_DIR}/src/${WITH_DDS}" "${_A_HEADER}")
-    set(INCLUDE_STATEMENTS "${INCLUDE_STATEMENTS}#include <${_REL_TO_PROVIDER}>\n")
+    get_filename_component(_HEADER_FILE_NAME "${_A_HEADER}" NAME)
+    set(INCLUDE_STATEMENTS "${INCLUDE_STATEMENTS}#include <${_HEADER_FILE_NAME}>\n")
 endforeach ()
 
 configure_file("src/${PROJECT_NAME}.h.in" "${PROJECT_NAME}.h" @ONLY)
