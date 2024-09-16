@@ -107,7 +107,27 @@ This example introduces:
 1. Publishing messages to other participants.
 1. Listening, and reacting to, incoming DDS messages.
 
-[Tutorial Step 7](tutorial_steps/step_7.md)
+As of this writing, the OMG maintains two (2) Platform-Specific Modules (PSM)
+for the C++ language. Depending on how the Foundation library was built (either
+with [`DdsKit`](./building.md#building) or
+[`IsoDdsKit`](./building.md#building-with-isoddskit)). These two options are
+mutually exclusive; only one may be built into a Foundation product.
+
+### Step 7 Variant: Classic C++ DDS
+
+One DDS PSM is solely based on the mapping of abstract definitions written in
+the OMG Interface Definition Language (IDL) to C++. This variant is referred to
+in the Foundation as the "Classic C++" variant.
+
+[Tutorial Step 7: Classic C++ Variant](tutorial_steps/step_7.md)
+
+### Step 7a Variant: ISO/IEC C++ DDS
+
+The second PSM for the C++ language prescribes the Application Programming
+Interface (API) irrespective of IDL mapping. It is identified by the OMG as the
+[OMG ISO/IEC C++ PSM][OmgIsoCxxPsm].
+
+[Tutorial Step 7a: ISO/IEC C++ Variant](tutorial_steps/step_7a.md)
 
 ## Step 8: Instrument Agent Primer
 
@@ -122,3 +142,6 @@ steps together in order to implement the most basic instrument agent behavior:
 translating between a native interface and a DDS software bus.
 
 [Tutorial Step 8](tutorial_steps/step_8.md)
+
+
+[OmgIsoCxxPsm]: https://www.omg.org/spec/DDS-PSM-Cxx/1.0/About-DDS-PSM-Cxx "OMG ISO/IEC C++ PSM"

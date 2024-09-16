@@ -220,13 +220,14 @@ command as follows:
 The `target_link_libraries()` command statement folds in the `IsoDdsKit` and
 `MyIsoSoftwareBus` components, identified by their fully-scoped names.
 
-## Software Bus Topic Configuration
+## Software Bus Message Definition
 
 As initially enumerated in the [example design](#example-design), the software
 bus library will define two (2) message structures. One structure will be
 designed to carry engineering data for a fictional instrument. The other
 structure will be designed to carry commands as dispatched by an operator. Add
-the following content to the `src/MyIsoSoftwareBus.idl` IDL source file:
+the following content to the `src/MyIsoSoftwareBus.idl` IDL source file in the
+`MyIsoSoftwareBus` directory:
 
 ```
 module MyIsoSoftwareBus
@@ -263,6 +264,16 @@ but a good summary of what the file defines is as follows:
 
 This example will only make use of the `EngineeringData` message type. The
 `Command` message type will be saved for use in future examples.
+
+## Software Bus Template Header File
+
+The template header file provided in the bootstrap copy of the software bus
+must bear the name of the project. From the `MyIsoSoftwareBus` project
+directory, change the name of the template header file as follows:
+
+```console
+$ mv src/SampleIsoSoftwareBus.h.in src/MyIsoSoftwareBus.h.in
+```
 
 ## Application Main Function
 
@@ -310,6 +321,22 @@ instead of directly from the `CoreKit::AppDelegate` class.
 `IsoDdsKit::DdsEnabledAppDelegate` derives from `CoreKit::AppDelegate` and
 adds functionality common to all DDS-enabled applications.
 
+Since the `IsoDdsKit::DdsEnabledAppDelegate` class provides some functionality
+this delegate intends to augment, one augmented method must be marked with the
+`override` keyword. Update the declaration of the `configureCmdLineArgs()`
+method as follows:
+
+```diff
+-   void configureCmdLineArgs(CoreKit::Application *theApp);
++   virtual void configureCmdLineArgs(CoreKit::Application *theApp) override;
+```
+
+> [!NOTE]
+> The additional decoration around the `configureCmdLineArgs()` method was not
+> necessary in previous examples because the application's delegate class in
+> those examples would derive directly from the `CoreKit::AppDelegate` class,
+> which does not provide a definition or implementation for the method.
+
 The `MyAppDelegate` class implements the `CoreKit::InterruptListener` interface
 so that it can receive timer expiration events. Furthermore, the class has a
 static utility method `EngineeringDataToString()` that is used to transform
@@ -323,7 +350,7 @@ Next, add the timer expiration event handler and instance fields to the
 +
 +   virtual void timerExpired(int timerId) override;
 +
-+   void onEngineeringData(MySoftwareBus::EngineeringData const& sample);
++   void onEngineeringData(MyIsoSoftwareBus::EngineeringData const& sample);
 +
 +private:
 +   using EngrDataReaderContextPtr = std::shared_ptr< IsoDdsKit::ReaderContext< MyIsoSoftwareBus::EngineeringData > >;
@@ -678,7 +705,7 @@ MyAppDelegate::timerExpired(int timerId)
     sample.bravo(m_distr(m_rng));
     sample.charlie(m_distr(m_rng));
 
-    G_MyApp->log() << AppLog::LL_INFO << "Sending sample: " << EngineeringDataToString(aSample) << EndLog;
+    G_MyApp->log() << AppLog::LL_INFO << "Sending sample: " << EngineeringDataToString(sample) << EndLog;
     m_engrDataWriterContext->writer().write(sample);
 }
 ```
@@ -735,7 +762,7 @@ $ cd build
 $ cmake -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-  -DCMAKE_PREFIX_PATH="/opt/iceoryx/2.95.0\;/opt/cyclonedds/0.10.5" \
+  -DCMAKE_PREFIX_PATH="/opt/iceoryx/2.95.0;/opt/cyclonedds/0.10.5" \
   -DWITH_DDS=CycloneDDS-CXX \
   -G Ninja \
   ..
@@ -761,6 +788,7 @@ $ cd build
 $ cmake -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+  -DCMAKE_PREFIX_PATH="/opt/iceoryx/2.95.0;/opt/cyclonedds/0.10.5" \
   -DFoundation_DIR=${FOUNDATION_ROOT}/build/Foundation \
   -DMyIsoSoftwareBus_DIR=$(readlink -f ../../MyIsoSoftwareBus/build/MyIsoSoftwareBus) \
   -G Ninja ..
@@ -819,12 +847,14 @@ The application should start after a short while and begin reporting on the
 samples it sends:
 
 ```
-[2024-06-07T14:09:30.426Z] [SoftwareBusPrimer] [108419] [INFORMATION]: Opened domain participant to domain (30).
-[2024-06-07T14:09:31.428Z] [SoftwareBusPrimer] [108419] [INFORMATION]: Sending sample: { "alpha": 83, "bravo": 86, "charlie": 77 }
-[2024-06-07T14:09:32.428Z] [SoftwareBusPrimer] [108419] [INFORMATION]: Sending sample: { "alpha": 15, "bravo": 93, "charlie": 35 }
-[2024-06-07T14:09:33.428Z] [SoftwareBusPrimer] [108419] [INFORMATION]: Sending sample: { "alpha": 86, "bravo": 92, "charlie": 49 }
-[2024-06-07T14:09:34.428Z] [SoftwareBusPrimer] [108419] [INFORMATION]: Sending sample: { "alpha": 21, "bravo": 62, "charlie": 27 }
-[2024-06-07T14:09:35.428Z] [SoftwareBusPrimer] [108419] [INFORMATION]: Sending sample: { "alpha": 90, "bravo": 59, "charlie": 63 }
+[2024-09-16T17:37:53.909Z] [IsoSoftwareBusPrimer] [1574026] [INFORMATION]: Set application to publisher mode.
+[2024-09-16T17:37:53.909Z] [IsoSoftwareBusPrimer] [1574026] [INFORMATION]: Opened domain participant to domain (30)
+[2024-09-16T17:37:54.910Z] [IsoSoftwareBusPrimer] [1574026] [INFORMATION]: Sending sample: { "alpha": 69, "bravo": 54, "charlie": 39 }
+[2024-09-16T17:37:55.910Z] [IsoSoftwareBusPrimer] [1574026] [INFORMATION]: Sending sample: { "alpha": 41, "bravo": 41, "charlie": 12 }
+[2024-09-16T17:37:56.910Z] [IsoSoftwareBusPrimer] [1574026] [INFORMATION]: Sending sample: { "alpha": 33, "bravo": 60, "charlie": 41 }
+[2024-09-16T17:37:57.910Z] [IsoSoftwareBusPrimer] [1574026] [INFORMATION]: Sending sample: { "alpha": 37, "bravo": 86, "charlie": 59 }
+[2024-09-16T17:37:58.910Z] [IsoSoftwareBusPrimer] [1574026] [INFORMATION]: Sending sample: { "alpha": 98, "bravo": 82, "charlie": 15 }
+[2024-09-16T17:37:59.910Z] [IsoSoftwareBusPrimer] [1574026] [INFORMATION]: Sending sample: { "alpha": 70, "bravo": 46, "charlie": 42 }
 ```
 
 Back in the terminal window where the subscribing application was started, more
@@ -832,12 +862,14 @@ log message activity evinces receipt of samples transmitted by the publishing
 application:
 
 ```
-[2024-06-07T14:09:29.821Z] [SoftwareBusPrimer] [108323] [INFORMATION]: Opened domain participant to domain (30).
-[2024-06-07T14:09:31.429Z] [SoftwareBusPrimer] [108323] [INFORMATION]: Received sample: { "alpha": 83, "bravo": 86, "charlie": 77 }
-[2024-06-07T14:09:32.429Z] [SoftwareBusPrimer] [108323] [INFORMATION]: Received sample: { "alpha": 15, "bravo": 93, "charlie": 35 }
-[2024-06-07T14:09:33.429Z] [SoftwareBusPrimer] [108323] [INFORMATION]: Received sample: { "alpha": 86, "bravo": 92, "charlie": 49 }
-[2024-06-07T14:09:34.429Z] [SoftwareBusPrimer] [108323] [INFORMATION]: Received sample: { "alpha": 21, "bravo": 62, "charlie": 27 }
-[2024-06-07T14:09:35.429Z] [SoftwareBusPrimer] [108323] [INFORMATION]: Received sample: { "alpha": 90, "bravo": 59, "charlie": 63 }
+[2024-09-16T17:37:17.527Z] [IsoSoftwareBusPrimer] [1574008] [INFORMATION]: Set application to subscriber mode.
+[2024-09-16T17:37:17.529Z] [IsoSoftwareBusPrimer] [1574008] [INFORMATION]: Opened domain participant to domain (30)
+[2024-09-16T17:37:54.911Z] [IsoSoftwareBusPrimer] [1574008] [INFORMATION]: Received sample: { "alpha": 69, "bravo": 54, "charlie": 39 }
+[2024-09-16T17:37:55.911Z] [IsoSoftwareBusPrimer] [1574008] [INFORMATION]: Received sample: { "alpha": 41, "bravo": 41, "charlie": 12 }
+[2024-09-16T17:37:56.910Z] [IsoSoftwareBusPrimer] [1574008] [INFORMATION]: Received sample: { "alpha": 33, "bravo": 60, "charlie": 41 }
+[2024-09-16T17:37:57.911Z] [IsoSoftwareBusPrimer] [1574008] [INFORMATION]: Received sample: { "alpha": 37, "bravo": 86, "charlie": 59 }
+[2024-09-16T17:37:58.911Z] [IsoSoftwareBusPrimer] [1574008] [INFORMATION]: Received sample: { "alpha": 98, "bravo": 82, "charlie": 15 }
+[2024-09-16T17:37:59.911Z] [IsoSoftwareBusPrimer] [1574008] [INFORMATION]: Received sample: { "alpha": 70, "bravo": 46, "charlie": 42 }
 ```
 
 ## Conclusion

@@ -80,7 +80,7 @@ export(
 )
 
 configure_file(
-    "cmake/SampleSoftwareBusConfig.cmake"
+    "cmake/SampleIsoSoftwareBusConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
     @ONLY
 )

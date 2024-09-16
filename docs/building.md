@@ -101,7 +101,8 @@ as follows:
 
 With those locations, populating the `CMAKE_PREFIX_PATH` variable with the
 value `/opt/iceoryx/2.95.0\;/opt/cyclonedds/0.10.5` (making sure the semicolon
-is escaped) will point the Foundation build plan in the right direction.
+is escaped if not inside a quoted string) will point the Foundation build plan
+in the right direction.
 
 > [!NOTE]
 > [Cyclone DDS][CycloneDDS] is only supported when the Foundation is configured
