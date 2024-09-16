@@ -641,21 +641,21 @@ if (WITH_DDSKIT STREQUAL "Classic")
             Dev
     )
 elseif (WITH_DDSKIT STREQUAL "ISO")
-get_target_property(ISO_DDS_KIT_SOURCES IsoDdsKit SOURCES)
-foreach (AN_ISO_DDS_KIT_SOURCE ${ISO_DDS_KIT_SOURCES})
-    get_filename_component(ISO_DDS_KIT_SOURCE_EXT "${AN_ISO_DDS_KIT_SOURCE}" LAST_EXT)
-    if ((${ISO_DDS_KIT_SOURCE_EXT} STREQUAL ".hpp") OR (${ISO_DDS_KIT_SOURCE_EXT} STREQUAL ".h"))
-        list (APPEND ISO_DDS_KIT_HEADERS "${AN_ISO_DDS_KIT_SOURCE}")
-    endif ()
-endforeach ()
-install(
-    FILES
-        ${ISO_DDS_KIT_HEADERS}
-    DESTINATION
-        "include/IsoDdsKit"
-    COMPONENT
-        Dev
-)
+    get_target_property(ISO_DDS_KIT_SOURCES IsoDdsKit SOURCES)
+    foreach (AN_ISO_DDS_KIT_SOURCE ${ISO_DDS_KIT_SOURCES})
+        get_filename_component(ISO_DDS_KIT_SOURCE_EXT "${AN_ISO_DDS_KIT_SOURCE}" LAST_EXT)
+        if ((${ISO_DDS_KIT_SOURCE_EXT} STREQUAL ".hpp") OR (${ISO_DDS_KIT_SOURCE_EXT} STREQUAL ".h"))
+            list (APPEND ISO_DDS_KIT_HEADERS "${AN_ISO_DDS_KIT_SOURCE}")
+        endif ()
+    endforeach ()
+    install(
+        FILES
+            ${ISO_DDS_KIT_HEADERS}
+        DESTINATION
+            "include/IsoDdsKit"
+        COMPONENT
+            Dev
+    )
 endif ()
 
 include(CMakePackageConfigHelpers)
