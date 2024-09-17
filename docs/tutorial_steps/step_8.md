@@ -1,4 +1,4 @@
-# Tutorial Step 8: Instrument Agent Primer
+# Tutorial Step 8: Instrument Agent Primer (Classic Variant)
 
 Coming to the end of this tutorial journey, this final example will bring
 together several of the concepts introduced in prior tutorial examples to
