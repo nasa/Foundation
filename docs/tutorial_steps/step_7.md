@@ -1,4 +1,4 @@
-# Tutorial Step 7: Software Bus Participation Basics
+# Tutorial Step 7: Software Bus Participation Basics (Classic Variant)
 
 Several of the examples prior to this one have demonstrated, in their own way,
 communication between software components. Although effective, they require a
