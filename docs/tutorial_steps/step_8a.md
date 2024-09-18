@@ -228,7 +228,7 @@ $ cmake -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_PREFIX_PATH="/opt/iceoryx/2.95.0;/opt/cyclonedds/0.10.5" \
   -DNcursesKit_DIR=$(readlink -f ../../NcursesKit/build/NcursesKit) \
   -DFoundation_DIR=${FOUNDATION_ROOT}/build/Foundation \
-  -DMySoftwareBus_DIR=$(readlink -f ../../MySoftwareBus/build/MySoftwareBus) \
+  -DMyIsoSoftwareBus_DIR=$(readlink -f ../../MyIsoSoftwareBus/build/MyIsoSoftwareBus) \
   -G Ninja \
   ..
 $ ninja
@@ -238,12 +238,12 @@ $ ninja
 
 Similar to the other examples, this example application must be given a unique
 name. Furthermore, the project dependency list must be updated to include
-support for DDS. In the `TutorialStep8a` directory, edit the project metadata in
+support for CAN Bus. In the `TutorialStep8a` directory, edit the project metadata in
 the `CMakeLists.txt` `project()` command as follows:
 
 ```diff
 - project(IsoSoftwareBusPrimer LANGUAGES CXX)
-+ project(VctAgent LANGUAGES CXX)
++ project(IsoVctAgent LANGUAGES CXX)
 ```
 
 Then, update the project dependencies in the `find_package()` command:
@@ -270,7 +270,7 @@ logging purposes in the call to `::CoreKit::Application::initialize()`. From the
 
 ```diff
 -G_MyApp->initialize("IsoSoftwareBusPrimer", argc, argv);
-+G_MyApp->initialize("VctAgent", argc, argv);
++G_MyApp->initialize("IsoVctAgent", argc, argv);
 ```
 
 ## Application Delegate
@@ -400,12 +400,13 @@ follows in the `src/MyAppDelegate.cpp` file:
 ```diff
 MyAppDelegate::MyAppDelegate():
 -   m_subscriberMode(false),
-    m_timerId(-1),
+-   m_timerId(-1),
 -   m_distr(0, 100)
++   m_timerId(-1)
 {
-+   m_currentValues.alpha = 0;
-+   m_currentValues.bravo = 0;
-+   m_currentValues.charlie = 0;
++   m_currentValues.alpha(0);
++   m_currentValues.bravo(0);
++   m_currentValues.charlie(0);
 }
 ```
 
@@ -612,7 +613,7 @@ void
 MyAppDelegate::applicationDidTerminate(Application *theApp)
 {
     m_engrDataWriterContext.reset();
-    m_commandDataReaderContext.reset();
+    m_commandReaderContext.reset();
     m_canIf.reset();
 
     DdsEnabledAppDelegate::applicationDidTerminate(theApp);
@@ -798,7 +799,7 @@ $ cmake -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DCMAKE_PREFIX_PATH="/opt/iceoryx/2.95.0;/opt/cyclonedds/0.10.5" \
   -DFoundation_DIR=${FOUNDATION_ROOT}/build/Foundation \
-  -DMySoftwareBus_DIR=$(readlink -f ../../MySoftwareBus/build/MySoftwareBus) \
+  -DMyIsoSoftwareBus_DIR=$(readlink -f ../../MyIsoSoftwareBus/build/MyIsoSoftwareBus) \
   -G Ninja ..
 ```
 
@@ -818,12 +819,18 @@ anything interesting like that; it merely provides regular 1Hz updates on
 unchanging data points:
 
 ```console
-$ ./VctAgent --can-if vcan0 --dds-domain 30
+$ ./IsoVctAgent --can-if vcan0 --dds-domain 30
+[2024-09-18T21:30:58.040Z] [IsoVctAgent] [1725335] [INFORMATION]: Opened domain participant to domain (30)
+[2024-09-18T21:30:59.055Z] [IsoVctAgent] [1725335] [INFORMATION]: Sending sample: { "alpha": 0, "bravo": 0, "charlie": 0 }
+[2024-09-18T21:31:00.055Z] [IsoVctAgent] [1725335] [INFORMATION]: Sending sample: { "alpha": 0, "bravo": 0, "charlie": 0 }
+[2024-09-18T21:31:01.055Z] [IsoVctAgent] [1725335] [INFORMATION]: Sending sample: { "alpha": 0, "bravo": 0, "charlie": 0 }
+[2024-09-18T21:31:02.055Z] [IsoVctAgent] [1725335] [INFORMATION]: Sending sample: { "alpha": 0, "bravo": 0, "charlie": 0 }
+[2024-09-18T21:31:03.055Z] [IsoVctAgent] [1725335] [INFORMATION]: Sending sample: { "alpha": 0, "bravo": 0, "charlie": 0 }
 ```
 
 ### Running a Subscribing Entity
 
-The example application used in [Step 7](./step_7.md#running-the-subscriber), in
+The example application used in [Step 7a](./step_7a.md#running-the-subscriber), in
 subscriber mode, can be used to confirm proper `EngineeringData` publishing,
 though. With the `VctAgent` application running in its own terminal window, open
 a new terminal shell session and run the example application in subscriber mode
@@ -831,12 +838,21 @@ to verify the software bus traffic:
 
 ```console
 $ ./IsoSoftwareBusPrimer --dds-domain=30 --subscriber
+[2024-09-18T21:31:56.403Z] [IsoSoftwareBusPrimer] [1725376] [INFORMATION]: Set application to subscriber mode.
+[2024-09-18T21:31:56.403Z] [IsoSoftwareBusPrimer] [1725376] [INFORMATION]: Opened domain participant to domain (30)
+[2024-09-18T21:31:57.310Z] [IsoSoftwareBusPrimer] [1725376] [INFORMATION]: Received sample: { "alpha": 0, "bravo": 0, "charlie": 0 }
+[2024-09-18T21:31:58.310Z] [IsoSoftwareBusPrimer] [1725376] [INFORMATION]: Received sample: { "alpha": 0, "bravo": 0, "charlie": 0 }
+[2024-09-18T21:31:59.310Z] [IsoSoftwareBusPrimer] [1725376] [INFORMATION]: Received sample: { "alpha": 0, "bravo": 0, "charlie": 0 }
+[2024-09-18T21:32:00.310Z] [IsoSoftwareBusPrimer] [1725376] [INFORMATION]: Received sample: { "alpha": 0, "bravo": 0, "charlie": 0 }
+[2024-09-18T21:32:01.310Z] [IsoSoftwareBusPrimer] [1725376] [INFORMATION]: Received sample: { "alpha": 0, "bravo": 0, "charlie": 0 }
+[2024-09-18T21:32:02.310Z] [IsoSoftwareBusPrimer] [1725376] [INFORMATION]: Received sample: { "alpha": 0, "bravo": 0, "charlie": 0 }
 ```
 
 ### Running the Virtual CAN Target
 
 When paired with the **Virtual CAN Target**, however, things start to look a
-little more interesting. In yet another terminal window, start the
+little more interesting. In yet another terminal window, with the shell current
+directory set to the `VirtualCanTarget` project build tree, start the
 `VirtualCanTarget` application by issuing the command:
 
 ```console
@@ -894,7 +910,8 @@ window to its previous state.
 
 Completing the solution architecture laid out
 [at the introduction](#tutorial-step-8-instrument-agent-primer-iso-variant)
-is the **Control Panel** application. In another terminal window, start the
+is the **Control Panel** application. In another terminal window, with the
+shell current working directory on the `IsoControlPanel` build tree, start the
 `IsoControlPanel` application by issuing the command:
 
 ```console
