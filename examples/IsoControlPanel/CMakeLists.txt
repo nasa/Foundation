@@ -3,7 +3,7 @@
 # =============================================================================
 cmake_minimum_required(VERSION 3.12)
 
-project(ControlPanel VERSION 1.0.0 LANGUAGES CXX)
+project(IsoControlPanel VERSION 1.0.0 LANGUAGES CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 
