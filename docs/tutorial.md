@@ -141,7 +141,20 @@ DDS protocol. This example brings several of the concepts introduced in previous
 steps together in order to implement the most basic instrument agent behavior:
 translating between a native interface and a DDS software bus.
 
+Similar to Tutorial Step 7, this step brings with it two (2) variants based on
+what DDS C++ PSM the Foundation library was built with.
+
+### Step 8 Variant: Classic C++ DDS
+
+For Foundation builds that use the "Classic C++" DDS PSM:
+
 [Tutorial Step 8](tutorial_steps/step_8.md)
+
+### Step 8 Variant: ISO/IEC C++ DDS
+
+For Foundation builds that use the "ISO/IEC C++" DDS PSM:
+
+[Tutorial Step 8a: ISO/IEC C++ Variant](tutorial_steps/step_8a.md)
 
 
 [OmgIsoCxxPsm]: https://www.omg.org/spec/DDS-PSM-Cxx/1.0/About-DDS-PSM-Cxx "OMG ISO/IEC C++ PSM"
