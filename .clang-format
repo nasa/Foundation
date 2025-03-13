@@ -1,0 +1,215 @@
+# Compatible with clang-format v.18
+---
+BasedOnStyle: LLVM
+IndentWidth: 4
+LineEnding: LF
+---
+Language: Cpp
+AccessModifierOffset: 0
+AlignAfterOpenBracket: BlockIndent
+AlignArrayOfStructures: Right
+AlignConsecutiveAssignments: false
+AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: false
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+AlignEscapedNewlines: Left
+AlignOperands: Align
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: false
+# FIXME - Option deprecated in future clang-format versions
+AllowAllConstructorInitializersOnNextLine: false
+# END FIXME
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowBreakBeforeNoexceptSpecifier: Never
+AllowShortBlocksOnASingleLine: Empty
+# AllowShortCaseExpressionOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortCompoundRequirementOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: Empty
+AllowShortLoopsOnASingleLine: false
+# AllowShortNamespacesOnASingleLine: false
+# FIXME - Option deprecated in future clang-format versions
+AlwaysBreakAfterDefinitionReturnType: All
+# END FIXME
+# FIXME - Option renamed to "BreakAfterReturnType" in future clang-format versions
+AlwaysBreakAfterReturnType: All
+# END FIXME
+AlwaysBreakBeforeMultilineStrings: false
+# FIXME - Option renamed to "BreakTemplateDeclarations" in future clang-format versions
+AlwaysBreakTemplateDeclarations: Yes
+# END FIXME
+# FIXME - Should identify attribute keywords we use
+AttributeMacros: []
+# END FIXME
+BinPackArguments: false
+# FIXME - Schema changed in future clang-format versions
+BinPackParameters: false
+# END FIXME
+BitFieldColonSpacing: None
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterObjCDeclaration: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: true
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+BracedInitializerIndentWidth: 4
+BreakAdjacentStringLiterals: true
+BreakAfterAttributes: Leave
+# BreakAfterReturnType: TopLevel
+BreakArrays: false
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Allman
+BreakBeforeConceptDeclarations: Always
+BreakBeforeInlineASMColon: Always
+BreakBeforeTernaryOperators: false
+# BreakBinaryOperators: Never
+BreakConstructorInitializers: AfterColon
+BreakInheritanceList: AfterColon
+BreakStringLiterals: true
+# BreakTemplateDeclarations: Yes
+ColumnLimit: 120
+CommentPragmas: ""
+CompactNamespaces: false
+# FIXME - Option deprecated in future clang-format versions
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+# END FIXME
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+Cpp11BracedListStyle: false
+DeriveLineEnding: false
+DerivePointerAlignment: false
+DisableFormat: false
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: Always
+ExperimentalAutoDetectBinPacking: false
+FixNamespaceComments: true
+ForEachMacros:
+  - BOOST_FOREACH
+IfMacros: []
+IncludeBlocks: Preserve
+IncludeIsMainRegex: '(Test)?$'
+IncludeIsMainSourceRegex: ''
+IndentAccessModifiers: false
+IndentCaseBlocks: false
+IndentCaseLabels: true
+IndentExternBlock: AfterExternBlock
+IndentGotoLabels: false
+IndentPPDirectives: AfterHash
+IndentRequiresClause: false
+IndentWrappedFunctionNames: false
+InsertBraces: false
+InsertNewlineAtEOF: true
+IntegerLiteralSeparator:
+  Binary: 0
+  Decimal: 0
+  Hex: 0
+# FIXME: Schema changes in future versions of clang-format
+KeepEmptyLinesAtEOF: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+# KeepEmptyLines:
+#   AtEndOfFile: false
+#   AtStartOfBlock: false
+#   AtStartOfFile: false
+# END FIXME
+# KeepFormFeed: false
+LambdaBodyIndentation: Signature
+MacroBlockBegin: ""
+MacroBlockEnd: ""
+Macros: []
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+NamespaceMacros: []
+PPIndentWidth: 2
+PackConstructorInitializers: Never
+PointerAlignment: Left
+QualifierAlignment: Custom
+QualifierOrder:
+  - static
+  - inline
+  - friend
+  - constexpr
+  - restrict
+  - type
+  - const
+  - volatile
+ReferenceAlignment: Left
+# FIXME: Schema changed in future versions of clang-format
+ReflowComments: true
+# END FIXME
+RemoveBracesLLVM: false
+# RemoveEmptyLinesInUnwrappedLines: true
+RemoveParentheses: Leave
+RemoveSemicolon: false
+RequiresClausePosition: OwnLine
+RequiresExpressionIndentation: OuterScope
+SeparateDefinitionBlocks: Always
+ShortNamespaceLines: 0
+SkipMacroDefinitionBody: false
+SortIncludes: Never
+SortUsingDeclarations: LexicographicNumeric
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: false
+SpaceAroundPointerQualifiers: Before
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: false
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 2
+SpacesInAngles: true
+# FIXME - Options deprecated in future versions of clang-format
+SpacesInCStyleCastParentheses: false
+SpacesInConditionalStatement: true
+# END FIXME
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: -1
+SpacesInParens: Custom
+SpacesInParensOptions:
+  InConditionalStatements: false
+  InCStyleCasts: false
+  InEmptyParentheses: false
+  Other: false
+# FIXME - Option deprecated in future versions of clang-format
+SpacesInParentheses: false
+# END FIXME
+SpacesInSquareBrackets: false
+Standard: c++14
+StatementAttributeLikeMacros: []
+StatementMacros: []
+TabWidth: 4
+TypeNames: []
+TypenameMacros: []
+# FIXME - Option deprecated in future versions of clang-format
+UseCRLF: false
+# END FIXME
+UseTab: Never
+# VariableTemplates: []
+WhitespaceSensitiveMacros: []
+# WrapNamespaceBodyWithEmptyLines: Always
