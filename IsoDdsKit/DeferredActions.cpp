@@ -7,22 +7,17 @@
 
 #include "DeferredActions.hpp"
 
-
 namespace IsoDdsKit
 {
 
-
-void
-DeferredActions::add(ActionFuture&& actionFuture)
+void DeferredActions::add(ActionFuture &&actionFuture)
 {
     LockGuard guard(m_queueMutex);
 
     m_queue.emplace_back(std::forward< ActionFuture >(actionFuture));
 }
 
-
-bool
-DeferredActions::dispatch()
+bool DeferredActions::dispatch()
 {
     LockGuard guard(m_queueMutex);
 
@@ -33,8 +28,9 @@ DeferredActions::dispatch()
         {
             m_queue.front().get();
         }
-        catch (std::exception& ex)
-        {}
+        catch (std::exception &ex)
+        {
+        }
 
         m_queue.pop_front();
         result = !m_queue.empty();
@@ -43,11 +39,11 @@ DeferredActions::dispatch()
     return result;
 }
 
-
-void
-DeferredActions::dispatchAll()
+void DeferredActions::dispatchAll()
 {
-    while (dispatch()) {}
+    while (dispatch())
+    {
+    }
 }
 
 } // end namespace IsoDdsKit

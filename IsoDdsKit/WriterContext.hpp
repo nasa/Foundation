@@ -30,12 +30,15 @@ private:
     PublicationMatchedStatusDistributionPtr m_publicationMatchedStatusDistribution;
 
 public:
-    explicit WriterContext(dds::pub::Publisher& publisher, dds::topic::Topic< SampleType >& topic);
+    explicit WriterContext(dds::pub::Publisher &publisher, dds::topic::Topic< SampleType > &topic);
 
-    explicit WriterContext(dds::pub::Publisher& publisher, dds::topic::Topic< SampleType >& topic, dds::pub::qos::DataWriterQos const& qos);
+    explicit WriterContext(dds::pub::Publisher &publisher, dds::topic::Topic< SampleType > &topic,
+                            dds::pub::qos::DataWriterQos const &qos);
 
-    WriterContext(WriterContext const& other) = delete;
-    WriterContext(WriterContext&& other) = delete;
+    WriterContext &operator=(const WriterContext &) = delete;
+    WriterContext &operator=(WriterContext &&) = delete;
+    WriterContext(WriterContext const &other) = delete;
+    WriterContext(WriterContext &&other) = delete;
 
     virtual ~WriterContext();
 
@@ -45,8 +48,11 @@ public:
 
     virtual void inputAvailableFrom(CoreKit::InputSource *source) override;
 
-    inline Writer& writer()
+    inline Writer &writer()
     { return m_writer; }
+
+    inline WriterMux &writerMux()
+    { return m_writerMux; }
 
     PublicationMatchedStatusDistribution& publicationMatchedStatusDistribution();
 };
@@ -57,10 +63,9 @@ WriterContext< SampleType >::WriterContext(
     dds::pub::Publisher& publisher,
     dds::topic::Topic< SampleType >& topic
 ):
-    m_writer(dds::core::null),
+    m_writer(Writer(publisher, topic)),
     m_writerMux(this)
 {
-    m_writer = Writer(publisher, topic);
 }
 
 
@@ -70,10 +75,9 @@ WriterContext< SampleType >::WriterContext(
     dds::topic::Topic< SampleType >& topic,
     dds::pub::qos::DataWriterQos const& qos
 ):
-    m_writer(dds::core::null),
+    m_writer(Writer(publisher, topic, qos)),
     m_writerMux(this)
 {
-    m_writer = Writer(publisher, topic, qos);
 }
 
 

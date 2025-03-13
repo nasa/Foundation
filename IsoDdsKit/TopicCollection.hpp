@@ -31,6 +31,10 @@ private:
 public:
     TopicCollection() = default;
 
+    TopicCollection(const TopicCollection &) = default;
+    TopicCollection(TopicCollection &&) = delete;
+    TopicCollection &operator=(const TopicCollection &) = default;
+    TopicCollection &operator=(TopicCollection &&) = delete;
     virtual ~TopicCollection() = default;
 
     template< typename SampleType >

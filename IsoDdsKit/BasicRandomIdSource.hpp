@@ -48,7 +48,7 @@ public:
      *
      * \param seed Seed value to use in the random number generator.
      */
-    BasicRandomIdSource(unsigned int seed);
+    explicit BasicRandomIdSource(unsigned int seed);
 
     /**
      * \brief Copy construction not allowed.
@@ -70,7 +70,7 @@ public:
      *
      * \return The random number.
      */
-    virtual int next() override;
+    int next() override;
 
     /**
      * \brief Copy assignment not allowed.

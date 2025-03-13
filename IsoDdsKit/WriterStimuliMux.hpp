@@ -41,11 +41,11 @@ public:
     WriterStimuliMux(WriterStimuliMux const& other) = delete;
     WriterStimuliMux(WriterStimuliMux&& other) = delete;
 
-    virtual ~WriterStimuliMux() = default;
+    ~WriterStimuliMux() override = default;
 
     void dispatchDeferred();
 
-    virtual void on_publication_matched(dds::pub::DataWriter< SampleType >& writer, dds::core::status::PublicationMatchedStatus const& status) override;
+    void on_publication_matched(dds::pub::DataWriter< SampleType >& writer, dds::core::status::PublicationMatchedStatus const& status) override;
 
     dds::core::status::StatusMask statusMask() const;
 
@@ -77,8 +77,8 @@ WriterStimuliMux< SampleType >::on_publication_matched(dds::pub::DataWriter< Sam
                 std::move(publicationMatchedStatusActionFac->createNew(status))
             )
         );
+        this->assertEvent();
     }
-    this->assertEvent();
 }
 
 template< typename SampleType >

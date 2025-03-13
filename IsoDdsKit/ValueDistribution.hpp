@@ -35,9 +35,14 @@ private:
 public:
     ValueDistribution();
 
-    ValueDistribution(IdSourcePtr listenerIdSource);
+    explicit ValueDistribution(IdSourcePtr listenerIdSource);
 
-    virtual ~ValueDistribution();
+    ValueDistribution& operator=(ValueDistribution const& other) = delete;
+    ValueDistribution& operator=(ValueDistribution&& other) = delete;
+    ValueDistribution(ValueDistribution const& other) = delete;
+    ValueDistribution(ValueDistribution&& other) = delete;
+
+    virtual ~ValueDistribution() = default;
 
     template< typename ListenerCallable >
     int addListener(ListenerCallable&& callable);
@@ -59,15 +64,8 @@ ValueDistribution< ValueType >::ValueDistribution()
 
 template< typename ValueType >
 ValueDistribution< ValueType >::ValueDistribution(IdSourcePtr listenerIdSource):
-    m_listenerIdSource(listenerIdSource)
+    m_listenerIdSource(std::move(listenerIdSource))
 {}
-
-
-template< typename ValueType >
-ValueDistribution< ValueType >::~ValueDistribution()
-{
-    m_listeners.clear();
-}
 
 
 template< typename ValueType >

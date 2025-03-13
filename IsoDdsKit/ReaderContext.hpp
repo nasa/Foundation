@@ -2,6 +2,7 @@
  * \file IsoDdsKit/ReaderContext.hpp
  * \brief Contains the definition of the \c IsoDdsKit::ReaderContext class.
  * \author Rolando J. Nieves
+ * \author Ryan O'Farrell
  * \date 2024-08-22 12:30:17
  */
 
@@ -66,40 +67,34 @@ public:
      *
      * This constructor overload uses the default quality of service settings
      * configured in the subscriber at the time of the call.
-
      * \param subscriber \c dds::sub::Subscriber instance associated with the
      *        reader.
      * \param topic \c dds::topic::Topic instance associated with the reader.
      */
-    explicit ReaderContext(
-        dds::sub::Subscriber& subscriber,
-        dds::topic::Topic< SampleType >& topic
-    );
+    explicit ReaderContext(dds::sub::Subscriber &subscriber, dds::topic::Topic< SampleType > &topic);
 
     /**
      * \brief Create the data reader using the provided infrastructure.
      *
      * This constructor overload uses the quality of service settings provided
      * in the argument list.
-
      * \param subscriber \c dds::sub::Subscriber instance associated with the
      *        reader.
      * \param topic \c dds::topic::Topic instance associated with the reader.
      * \param qos Quality of service settings to use when creating the reader.
      */
-    explicit ReaderContext(
-        dds::sub::Subscriber& subscriber,
-        dds::topic::Topic< SampleType >& topic,
-        dds::sub::qos::DataReaderQos const& qos
-    );
+    explicit ReaderContext(dds::sub::Subscriber &subscriber, dds::topic::Topic< SampleType > &topic,
+                         dds::sub::qos::DataReaderQos const &qos);
 
     /**
      * \brief Close out the reader reference in this instance.
      */
-    virtual ~ReaderContext();
+    ~ReaderContext() override;
 
-    ReaderContext(ReaderContext const& other) = delete;
-    ReaderContext(ReaderContext&& other) = delete;
+    ReaderContext &operator=(const ReaderContext &) = delete;
+    ReaderContext &operator=(ReaderContext &&) = delete;
+    ReaderContext(ReaderContext const &other) = delete;
+    ReaderContext(ReaderContext &&other) = delete;
 
     /**
      * \brief Register the reader with the application run loop.
@@ -130,15 +125,23 @@ public:
      *
      * \param source Input source that generated the event.
      */
-    virtual void inputAvailableFrom(CoreKit::InputSource *source) override;
+    void inputAvailableFrom(CoreKit::InputSource *source) override;
 
     /**
      * \brief Access the data reader instance managed by this object.
      *
      * \return \c dds::sub::DataReader instance managed by this object.
      */
-    inline Reader& reader()
+    inline Reader &reader()
     { return m_reader; }
+
+    /**
+     * \brief Access the data stimuli multiplexer instance managed by this object.
+     *
+     * \return \c ReaderStimuliMux instance managed by this object.
+     */
+    inline ReaderStimuliMux<SampleType> &readerMux()
+    { return m_readerMux; }
 
     /**
      * \brief Access the reader sample event distributor instance.
@@ -178,10 +181,9 @@ ReaderContext< SampleType >::ReaderContext(
     dds::sub::Subscriber& subscriber,
     dds::topic::Topic< SampleType >& topic
 ):
-    m_reader(dds::core::null),
+    m_reader(Reader(subscriber, topic)),
     m_readerMux(this)
 {
-    m_reader = Reader(subscriber, topic);
 }
 
 
@@ -191,10 +193,9 @@ ReaderContext< SampleType >::ReaderContext(
     dds::topic::Topic< SampleType >& topic,
     dds::sub::qos::DataReaderQos const& qos
 ):
-    m_reader(dds::core::null),
+    m_reader(Reader(subscriber, topic, qos)),
     m_readerMux(this)
 {
-    m_reader = Reader(subscriber, topic, qos);
 }
 
 

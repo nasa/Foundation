@@ -48,15 +48,15 @@ public:
     ReaderStimuliMux(ReaderStimuliMux const& other) = delete;
     ReaderStimuliMux(ReaderStimuliMux&& other) = delete;
 
-    virtual ~ReaderStimuliMux() = default;
+    ~ReaderStimuliMux() override = default;
 
     void dispatchDeferred();
 
-    virtual void on_data_available(Reader& reader) override;
+    void on_data_available(Reader& reader) override;
 
-    virtual void on_sample_lost(Reader& reader, dds::core::status::SampleLostStatus const& status) override;
+    void on_sample_lost(Reader& reader, dds::core::status::SampleLostStatus const& status) override;
 
-    virtual void on_subscription_matched(Reader& reader, dds::core::status::SubscriptionMatchedStatus const& status) override;
+    void on_subscription_matched(Reader& reader, dds::core::status::SubscriptionMatchedStatus const& status) override;
 
     dds::core::status::StatusMask statusMask() const;
 
@@ -128,7 +128,7 @@ template< typename SampleType >
 dds::core::status::StatusMask
 ReaderStimuliMux< SampleType >::statusMask() const
 {
-    dds::core::status::StatusMask result = dds::core::status::StatusMask::none();
+    auto result = dds::core::status::StatusMask::none();
 
     if (newReaderDataActionFac)
     {

@@ -75,12 +75,15 @@ public:
         /**
          * \brief Copy constructor.
          */
-        FactoryCall(FactoryCall const& other);
+        FactoryCall(FactoryCall const &other);
 
         /**
          * \brief Move constructor.
          */
-        FactoryCall(FactoryCall&& other);
+        FactoryCall(FactoryCall &&other) noexcept;
+
+        FactoryCall &operator=(const FactoryCall &) = delete;
+        FactoryCall &operator=(FactoryCall &&) = delete;
 
         /**
          * \brief Default destructor.
@@ -99,8 +102,9 @@ public:
          *
          * \return New data reader poll closure.
          */
-        EmitNewReaderDataAction< SampleType > createNew(Reader& reader);
+        EmitNewReaderDataAction< SampleType > createNew(Reader &reader);
     };
+
 
     /**
      * \brief Create the data reader polling closure.
@@ -119,9 +123,11 @@ public:
      * This constructor is required to make these closures compatible with
      * \c std::future<>
      */
-    EmitNewReaderDataAction(EmitNewReaderDataAction&& other);
+    EmitNewReaderDataAction(EmitNewReaderDataAction&& other) noexcept ;
 
     EmitNewReaderDataAction(EmitNewReaderDataAction const& other) = delete;
+    EmitNewReaderDataAction &operator=(const EmitNewReaderDataAction &) = delete;
+    EmitNewReaderDataAction &operator=(EmitNewReaderDataAction &&) = delete;
 
     /**
      * \brief Default destructor.
@@ -150,7 +156,7 @@ EmitNewReaderDataAction< SampleType >::FactoryCall::FactoryCall(FactoryCall cons
 {}
 
 template< typename SampleType >
-EmitNewReaderDataAction< SampleType >::FactoryCall::FactoryCall(FactoryCall&& other):
+EmitNewReaderDataAction< SampleType >::FactoryCall::FactoryCall(FactoryCall&& other) noexcept :
     m_sampleDistribution(std::move(other.m_sampleDistribution))
 {}
 
@@ -168,7 +174,7 @@ EmitNewReaderDataAction< SampleType >::EmitNewReaderDataAction(Reader& reader, S
 {}
 
 template< typename SampleType >
-EmitNewReaderDataAction< SampleType >::EmitNewReaderDataAction(EmitNewReaderDataAction< SampleType >&& other):
+EmitNewReaderDataAction< SampleType >::EmitNewReaderDataAction(EmitNewReaderDataAction< SampleType >&& other) noexcept:
     m_reader(other.m_reader),
     m_sampleDistribution(other.m_sampleDistribution)
 {}

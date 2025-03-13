@@ -8,6 +8,8 @@
 #ifndef _FOUNDATION_ISODDSKIT_EMITSTATUSACTION_HPP_
 #define _FOUNDATION_ISODDSKIT_EMITSTATUSACTION_HPP_
 
+#include <stdexcept>
+
 #include <dds/core/status/Status.hpp>
 
 #include <IsoDdsKit/ValueDistribution.hpp>
@@ -112,7 +114,7 @@ public:
      * This constructor is required to make these closures compatible with
      * \c std::future<>
      */
-    EmitStatusAction(EmitStatusAction&& other);
+    EmitStatusAction(EmitStatusAction&& other) noexcept;
 
     EmitStatusAction(EmitStatusAction const& other) = delete;
 
@@ -161,7 +163,7 @@ EmitStatusAction< StatusType >::EmitStatusAction(StatusType const& status, Statu
 {}
 
 template< typename StatusType >
-EmitStatusAction< StatusType >::EmitStatusAction(EmitStatusAction< StatusType >&& other):
+EmitStatusAction< StatusType >::EmitStatusAction(EmitStatusAction< StatusType >&& other) noexcept:
     m_status(std::move(other.m_status)),
     m_statusDistribution(std::move(other.m_statusDistribution))
 {}

@@ -68,7 +68,7 @@ public:
     /**
      * \brief Default destructor.
      */
-    virtual ~DdsEnabledAppDelegate() = default;
+    ~DdsEnabledAppDelegate() override = default;
 
     /**
      * \brief Add DDS-specific command-line arguments.
@@ -93,7 +93,7 @@ public:
      * \param theApp - \c CoreKit::Application instance to use when acquiring
      *        command-line arguments.
      */
-    virtual void applicationDidInitialize(CoreKit::Application *theApp) override;
+    void applicationDidInitialize(CoreKit::Application *theApp) override;
 
     /**
      * \brief Tear down all previously-created DDS infrastructure.
@@ -105,7 +105,7 @@ public:
      * \param theApp - Associated \c CoreKit::Application instance; not used in
      *        this method.
      */
-    virtual void applicationDidTerminate(CoreKit::Application *theApp) override;
+    void applicationDidTerminate(CoreKit::Application *theApp) override;
 
     /**
      * \brief Access the \c dds::domain::DomainParticipant this instance manages.
@@ -363,7 +363,7 @@ template< typename SampleType >
 DdsEnabledAppDelegate::TypedWriterContextPtr< SampleType >
 DdsEnabledAppDelegate::createWriterContext(std::string const& topicName)
 {
-    auto defaultQos = m_subscriber.default_datareader_qos();
+    auto defaultQos = m_publisher.default_datawriter_qos();
     return this->createWriterContext< SampleType >(topicName, defaultQos);
 }
 
